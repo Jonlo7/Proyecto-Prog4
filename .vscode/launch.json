@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug Ej08",
+        "type": "cppdbg",
+        "request": "launch",
+        
+        "program": "${workspaceFolder}/src/main.exe",
+        "args": [],
+        "stopAtEntry": false,
+        // Para que el depurador busque archivos en la carpeta src
+        "cwd": "${workspaceFolder}/src",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "gdb",
+        // Asegúrate de que exista gdb.exe en esa ruta
+        "miDebuggerPath": "C:/msys64/ucrt64/bin/gdb.exe",
+        // Referenciamos la tarea de compilación creada en tasks.json
+        "preLaunchTask": "C/C++: gcc.exe build active file",
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ]
+      }
+    ]
+  }
