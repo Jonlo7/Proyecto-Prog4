@@ -41,8 +41,14 @@ Este proyecto es un sistema de gestión de inventarios diseñado para pequeñas 
 
 El proyecto se puede compilar y depurar utilizando los archivos de configuración:
 
-- **launch.json:** Define la configuración de depuración para ejecutar el binario `gestor`.
-- **settings.json:** Configura el compilador y el estándar C, además de un comando para compilar y ejecutar mediante la extensión Code Runner.
+- **launch.json**  
+  Configura la depuración (por ejemplo, define el ejecutable, la ruta del depurador y la tarea previa de compilación).
+
+- **tasks.json**  
+  Define la tarea de compilación con GCC para generar el ejecutable a partir de los archivos fuente.
+
+- **settings.json**  
+  Establece las asociaciones de archivos y otros ajustes del entorno para trabajar con C en VSCode.
 
 ### Compilación Manual
 
@@ -120,6 +126,16 @@ El sistema permite registrar transacciones que involucran uno o varios productos
 
 Cada ítem se procesa automáticamente (calculando el total del ítem como el producto del precio del producto y la cantidad).  
 Al finalizar, se calcula el total de la transacción y se guarda en el fichero de ventas.
+
+---
+
+## Persistencia de Datos
+
+Los ficheros de datos se encuentran en la carpeta `data/` y son los siguientes:
+
+- **productos.txt:** Contiene la lista de productos con su estado (activo/inactivo).
+- **ventas.txt:** Registra las transacciones realizadas, incluyendo la fecha y el total de cada una.
+- **usuarios.txt:** Almacena los usuarios registrados, sus contraseñas y roles.
 
 ---
 
