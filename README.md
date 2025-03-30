@@ -123,14 +123,10 @@ Al finalizar, se calcula el total de la transacción y se guarda en el fichero d
 
 ---
 
-## Administración Avanzada
+## Administración Avanzada (se integrarán en fases posteriores)
 
 El módulo de administración (admin_cliente) es un stub que muestra un menú interactivo con opciones como:
 
 - Mostrar informes.
 - Consultar estadísticas.
 - Otras opciones futuras.
-
-*Nota:* Este módulo indica que las funcionalidades avanzadas se integrarán en fases posteriores (por ejemplo, mediante comunicación por sockets).
-
----
