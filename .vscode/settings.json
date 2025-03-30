@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "*.c": "c",
+        "*.h": "c"
+    },
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc",
+    "C_Cpp.default.cStandard": "c99",
+    "C_Cpp.default.intelliSenseMode": "gcc-x64",
+    "code-runner.executorMap": {
+        "c": "cd $dir && gcc -Wall -Wextra -std=c99 $fileName -o gestor && ./gestor"
+    }
+}
