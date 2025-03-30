@@ -130,3 +130,8 @@ El módulo de administración (admin_cliente) es un stub que muestra un menú in
 - Mostrar informes.
 - Consultar estadísticas.
 - Otras opciones futuras.
+
+## Autores
+
+Jon López Carrillo
+Roberto Fernandez Barrios
