@@ -20,28 +20,36 @@ void liberarInventario(Inventario* inv) {
     }
 }
 
-int cargarInventario(Inventario* inv) {
-    if (!inv) return -1;
-    FILE* file = fopen(PRODUCTOS_FILE, "r");
-    if (!file) return -1;
-
-    char line[256];
-    while (fgets(line, sizeof(line), file)) {
-        if (line[0] == '\n' || line[0] == '\r')
-            continue;
+/**
+ * Carga el inventario desde la base de datos SQLite.
+ * @param inv Puntero al inventario a cargar.
+ * @param db Puntero a la base de datos.
+ * @return Retorna 0 en caso de éxito o un valor distinto en caso de error.
+ */
+int cargarInventarioDB(Inventario* inv, sqlite3* db) {
+    if (!inv || !db) return -1;
+    const char* sql = "SELECT id, nombre, precio, stock, activo FROM productos;";
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Error preparando consulta: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
+    inv->cantidad = 0;
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
         Producto prod;
-        int activoInt;
-        int items = sscanf(line, "%d|%50[^|]|%f|%d|%d", 
-                           &prod.id, prod.nombre, &prod.precio, &prod.stock, &activoInt);
-        if (items < 5)
-            continue; 
-        prod.activo = (activoInt != 0);
-        
+        prod.id = sqlite3_column_int(stmt, 0);
+        const unsigned char* nombre = sqlite3_column_text(stmt, 1);
+        strncpy(prod.nombre, (const char*)nombre, MAX_NOMBRE);
+        prod.nombre[MAX_NOMBRE] = '\0';
+        prod.precio = (float)sqlite3_column_double(stmt, 2);
+        prod.stock = sqlite3_column_int(stmt, 3);
+        prod.activo = sqlite3_column_int(stmt, 4) != 0;
         if (inv->cantidad == inv->capacidad) {
             size_t nuevaCapacidad = inv->capacidad * 2;
             Producto* temp = realloc(inv->productos, nuevaCapacidad * sizeof(Producto));
             if (!temp) {
-                fclose(file);
+                sqlite3_finalize(stmt);
                 return -1;
             }
             inv->productos = temp;
@@ -49,54 +57,48 @@ int cargarInventario(Inventario* inv) {
         }
         inv->productos[inv->cantidad++] = prod;
     }
-    fclose(file);
+    sqlite3_finalize(stmt);
     return 0;
 }
 
-
-int guardarInventario(const Inventario* inv) {
-    if (!inv) return -1;
-    FILE* file = fopen(PRODUCTOS_FILE, "w");
-    if (!file) return -1;
-    
-    for (size_t i = 0; i < inv->cantidad; i++) {
-        const Producto* prod = &inv->productos[i];
-        fprintf(file, "%d|%s|%.2f|%d|%d\n", prod->id, prod->nombre, prod->precio, prod->stock, prod->activo ? 1 : 0);
+/**
+ * Inserta un nuevo producto en la base de datos SQLite.
+ * @param db Puntero a la base de datos.
+ * @param nombre Nombre del producto.
+ * @param precio Precio del producto.
+ * @param stock Stock del producto.
+ * @param activo Estado activo del producto (true o false).
+ * @return Retorna 0 en caso de éxito o un valor distinto en caso de error.
+ */
+int insertarProductoDB(sqlite3* db, const char* nombre, float precio, int stock, bool activo) {
+    if (!db || !nombre) return -1;
+    const char* sql = "INSERT INTO productos (nombre, precio, stock, activo) VALUES (?, ?, ?, ?);";
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Error preparando INSERT: %s\n", sqlite3_errmsg(db));
+        return -1;
     }
-    fclose(file);
+    sqlite3_bind_text(stmt, 1, nombre, -1, SQLITE_STATIC);
+    sqlite3_bind_double(stmt, 2, precio);
+    sqlite3_bind_int(stmt, 3, stock);
+    sqlite3_bind_int(stmt, 4, activo ? 1 : 0);
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        fprintf(stderr, "Error insertando producto: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return -1;
+    }
+    sqlite3_finalize(stmt);
     return 0;
 }
 
-int agregarProducto(Inventario* inv, const char* nombre, float precio, int stock, bool activo) {
-    if (!inv || !nombre) return -1;
-    
-    int nextId = 0;
-    for (size_t i = 0; i < inv->cantidad; i++) {
-        if (inv->productos[i].id > nextId)
-            nextId = inv->productos[i].id;
-    }
-    nextId++;
-    
-    if (inv->cantidad == inv->capacidad) {
-        size_t nuevaCapacidad = inv->capacidad * 2;
-        Producto* temp = realloc(inv->productos, nuevaCapacidad * sizeof(Producto));
-        if (!temp) return -1;
-        inv->productos = temp;
-        inv->capacidad = nuevaCapacidad;
-    }
-    
-    Producto prod;
-    prod.id = nextId;
-    strncpy(prod.nombre, nombre, MAX_NOMBRE);
-    prod.nombre[MAX_NOMBRE] = '\0';
-    prod.precio = precio;
-    prod.stock = stock;
-    prod.activo = activo;
-    
-    inv->productos[inv->cantidad++] = prod;
-    return 0;
-}
-
+/**
+ * Busca un producto por id en el inventario (en memoria).
+ * @param inv Puntero al inventario.
+ * @param id ID del producto a buscar.
+ * @return Retorna un puntero al producto encontrado o NULL si no se encuentra.
+ */
 Producto* buscarProducto(Inventario* inv, int id) {
     if (!inv) return NULL;
     for (size_t i = 0; i < inv->cantidad; i++) {
@@ -106,30 +108,101 @@ Producto* buscarProducto(Inventario* inv, int id) {
     return NULL;
 }
 
-int modificarProducto(Inventario* inv, int id, const char* nuevoNombre, float nuevoPrecio, int nuevoStock, bool nuevoActivo) {
-    Producto* prod = buscarProducto(inv, id);
-    if (!prod) return -1; 
-    if (nuevoNombre) {
-        strncpy(prod->nombre, nuevoNombre, MAX_NOMBRE);
-        prod->nombre[MAX_NOMBRE] = '\0';
+/**
+ * Modifica los datos de un producto existente en la base de datos SQLite.
+ * @param db Puntero a la base de datos.
+ * @param id ID del producto a modificar.
+ * @param nuevoNombre Nuevo nombre del producto (puede ser NULL para no modificarlo).
+ * @param nuevoPrecio Nuevo precio del producto.
+ * @param nuevoStock Nuevo stock del producto.
+ * @param nuevoActivo Nuevo estado activo del producto.
+ * @return Retorna 0 en caso de éxito o un valor distinto en caso de error.
+ */
+int modificarProductoDB(sqlite3* db, int id, const char* nuevoNombre, float nuevoPrecio, int nuevoStock, bool nuevoActivo) {
+    const char* sql = "UPDATE productos SET nombre = ?, precio = ?, stock = ?, activo = ? WHERE id = ?;";
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Error preparando UPDATE: %s\n", sqlite3_errmsg(db));
+        return -1;
     }
-    prod->precio = nuevoPrecio;
-    prod->stock = nuevoStock;
-    prod->activo = nuevoActivo;
+    if (nuevoNombre)
+        sqlite3_bind_text(stmt, 1, nuevoNombre, -1, SQLITE_STATIC);
+    else
+        sqlite3_bind_null(stmt, 1);
+    sqlite3_bind_double(stmt, 2, nuevoPrecio);
+    sqlite3_bind_int(stmt, 3, nuevoStock);
+    sqlite3_bind_int(stmt, 4, nuevoActivo ? 1 : 0);
+    sqlite3_bind_int(stmt, 5, id);
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        fprintf(stderr, "Error actualizando producto: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return -1;
+    }
+    sqlite3_finalize(stmt);
     return 0;
 }
 
-int actualizarStock(Inventario* inv, int id, int cantidad) {
-    Producto* prod = buscarProducto(inv, id);
-    if (!prod) return -1;  
-    if (prod->stock + cantidad < 0)
-        return -1; 
-    prod->stock += cantidad;
+/**
+ * Actualiza el stock de un producto (por ejemplo, en operaciones de venta o compra) en la base de datos SQLite.
+ * @param db Puntero a la base de datos.
+ * @param id ID del producto a actualizar.
+ * @param cantidad Cantidad a agregar (puede ser negativa para restar).
+ * @return Retorna 0 en caso de éxito o un valor distinto en caso de error.
+ */
+int actualizarStockDB(sqlite3* db, int id, int cantidad) {
+    // Obtenemos el stock actual
+    const char* sqlSelect = "SELECT stock FROM productos WHERE id = ?;";
+    sqlite3_stmt* stmtSelect;
+    int rc = sqlite3_prepare_v2(db, sqlSelect, -1, &stmtSelect, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Error preparando SELECT: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
+    sqlite3_bind_int(stmtSelect, 1, id);
+    rc = sqlite3_step(stmtSelect);
+    if (rc != SQLITE_ROW) {
+        fprintf(stderr, "Producto con ID %d no encontrado.\n", id);
+        sqlite3_finalize(stmtSelect);
+        return -1;
+    }
+    int stockActual = sqlite3_column_int(stmtSelect, 0);
+    sqlite3_finalize(stmtSelect);
+    if (stockActual + cantidad < 0)
+        return -1;
+    
+    const char* sqlUpdate = "UPDATE productos SET stock = ? WHERE id = ?;";
+    sqlite3_stmt* stmtUpdate;
+    rc = sqlite3_prepare_v2(db, sqlUpdate, -1, &stmtUpdate, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Error preparando UPDATE: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
+    sqlite3_bind_int(stmtUpdate, 1, stockActual + cantidad);
+    sqlite3_bind_int(stmtUpdate, 2, id);
+    rc = sqlite3_step(stmtUpdate);
+    if (rc != SQLITE_DONE) {
+        fprintf(stderr, "Error actualizando stock: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmtUpdate);
+        return -1;
+    }
+    sqlite3_finalize(stmtUpdate);
     return 0;
 }
 
-void listarProductos(const Inventario* inv) {
-    if (!inv) return;
+/**
+ * Imprime el listado de productos activos desde la base de datos SQLite.
+ * @param db Puntero a la base de datos.
+ */
+void listarProductosDB(sqlite3* db) {
+    const char* sql = "SELECT id, nombre, precio, stock FROM productos WHERE activo = 1;";
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Error preparando SELECT: %s\n", sqlite3_errmsg(db));
+        return;
+    }
     printf("\n\033[1;35m"); 
     printf("+--------------------------------------+\n");
     printf("|       LISTADO DE PRODUCTOS           |\n");
@@ -137,17 +210,23 @@ void listarProductos(const Inventario* inv) {
     printf("\033[0m");
     printf("ID\tNombre\t\t\tPrecio\tStock\n");
     printf("-------------------------------------------------\n");
-    for (size_t i = 0; i < inv->cantidad; i++) {
-        const Producto* prod = &inv->productos[i];
-        if (prod->activo) {
-            printf("%d\t%-20s\t%.2f\t%d\n", prod->id, prod->nombre, prod->precio, prod->stock);
-        }
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+        int id = sqlite3_column_int(stmt, 0);
+        const unsigned char* nombre = sqlite3_column_text(stmt, 1);
+        float precio = (float)sqlite3_column_double(stmt, 2);
+        int stock = sqlite3_column_int(stmt, 3);
+        printf("%d\t%-20s\t%.2f\t%d\n", id, nombre, precio, stock);
     }
+    sqlite3_finalize(stmt);
 }
 
 /*       MENUS       */
 
-void menuAgregarProducto(Inventario* inv) {
+/**
+ * Menú interactivo para agregar un nuevo producto utilizando la base de datos.
+ * @param db Puntero a la base de datos.
+ */
+void menuAgregarProductoDB(sqlite3* db) {
     char nombre[MAX_NOMBRE + 1];
     float precio;
     int stock;
@@ -169,13 +248,17 @@ void menuAgregarProducto(Inventario* inv) {
     scanf("%d", &activoInt);
     activo = (activoInt == 1);
 
-    if (agregarProducto(inv, nombre, precio, stock, activo) == 0)
+    if (insertarProductoDB(db, nombre, precio, stock, activo) == 0)
         printf("\n \033[1;32mProducto agregado exitosamente.\033[0m\n");
     else
         printf("\n \033[1;31mError al agregar el producto.\033[0m\n");
 }
 
-void menuActualizarStock(Inventario* inv) {
+/**
+ * Menú interactivo para actualizar el stock de un producto utilizando la base de datos.
+ * @param db Puntero a la base de datos.
+ */
+void menuActualizarStockDB(sqlite3* db) {
     int id, cantidad;
     printf("\n\033[1;35m");
     printf("+--------------------------------------+\n");
@@ -187,20 +270,32 @@ void menuActualizarStock(Inventario* inv) {
     printf("Ingrese la cantidad a agregar (use numero negativo para restar): ");
     scanf("%d", &cantidad);
 
-    if (actualizarStock(inv, id, cantidad) == 0)
+    if (actualizarStockDB(db, id, cantidad) == 0)
         printf("\n \033[1;32mStock actualizado exitosamente.\033[0m\n");
     else
         printf("\n \033[1;31mError al actualizar el stock.\033[0m\n");
 }
 
-void menuModificarProducto(Inventario* inv) {
+/**
+ * Menú interactivo para modificar un producto utilizando la base de datos.
+ * @param db Puntero a la base de datos.
+ */
+void menuModificarProductoDB(sqlite3* db) {
     int id;
     printf("Ingrese el ID del producto a modificar: ");
     scanf("%d", &id);
     
+    // Se carga el inventario en memoria para editar el producto
+    Inventario* inv = crearInventario();
+    if(cargarInventarioDB(inv, db) != 0) {
+        printf("\n \033[1;31mError cargando inventario.\033[0m\n");
+        liberarInventario(inv);
+        return;
+    }
     Producto* prod = buscarProducto(inv, id);
     if (!prod) {
          printf("\n \033[1;31mProducto con ID %d no encontrado.\033[0m\n", id);
+         liberarInventario(inv);
          return;
     }
     
@@ -221,46 +316,46 @@ void menuModificarProducto(Inventario* inv) {
          scanf("%d", &opcion);
          
          switch(opcion) {
-              case 1:
-                   {
-                       float nuevoPrecio;
-                       printf("Ingrese el nuevo precio: ");
-                       scanf("%f", &nuevoPrecio);
-                       prod->precio = nuevoPrecio;
-                       printf("\n \033[1;32mPrecio actualizado.\033[0m\n");
-                   }
-                   break;
-              case 2:
-                   {
-                       int nuevoStock;
-                       printf("Ingrese el nuevo stock: ");
-                       scanf("%d", &nuevoStock);
-                       prod->stock = nuevoStock;
-                       printf("\n \033[1;32mStock actualizado.\033[0m\n");
-                   }
-                   break;
-              case 3:
-                   {
-                       char nuevoNombre[MAX_NOMBRE + 1];
-                       printf("Ingrese el nuevo nombre: ");
-                       scanf(" %[^\n]", nuevoNombre);
-                       strncpy(prod->nombre, nuevoNombre, MAX_NOMBRE);
-                       prod->nombre[MAX_NOMBRE] = '\0';
-                       printf("\n \033[1;32mNombre actualizado.\033[0m\n");
-                   }
-                   break;
-              case 4:
-                   {
-                       prod->activo = false;
-                       printf("\n \033[1;32mProducto marcado como inactivo.\033[0m\n");
-                   }
-                   break;
+              case 1: {
+                  float nuevoPrecio;
+                  printf("Ingrese el nuevo precio: ");
+                  scanf("%f", &nuevoPrecio);
+                  prod->precio = nuevoPrecio;
+                  printf("\n \033[1;32mPrecio actualizado en memoria.\033[0m\n");
+              } break;
+              case 2: {
+                  int nuevoStock;
+                  printf("Ingrese el nuevo stock: ");
+                  scanf("%d", &nuevoStock);
+                  prod->stock = nuevoStock;
+                  printf("\n \033[1;32mStock actualizado en memoria.\033[0m\n");
+              } break;
+              case 3: {
+                  char nuevoNombre[MAX_NOMBRE + 1];
+                  printf("Ingrese el nuevo nombre: ");
+                  scanf(" %[^\n]", nuevoNombre);
+                  strncpy(prod->nombre, nuevoNombre, MAX_NOMBRE);
+                  prod->nombre[MAX_NOMBRE] = '\0';
+                  printf("\n \033[1;32mNombre actualizado en memoria.\033[0m\n");
+              } break;
+              case 4: {
+                  prod->activo = false;
+                  printf("\n \033[1;32mProducto marcado como inactivo en memoria.\033[0m\n");
+              } break;
               case 5:
-                   printf("\n Terminando edicion y guardando...\n");
-                   break;
+                  printf("\n Terminando edición y guardando cambios en la BD...\n");
+                  break;
               default:
-                   printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
-                   break;
+                  printf("\n \033[1;31mOpción inválida. Intente de nuevo.\033[0m\n");
+                  break;
          }
     } while(opcion != 5);
+    
+    // Actualizar la base de datos con los cambios realizados
+    if (modificarProductoDB(db, prod->id, prod->nombre, prod->precio, prod->stock, prod->activo) == 0)
+        printf("\n \033[1;32mProducto actualizado en la BD exitosamente.\033[0m\n");
+    else
+        printf("\n \033[1;31mError al actualizar el producto en la BD.\033[0m\n");
+    
+    liberarInventario(inv);
 }

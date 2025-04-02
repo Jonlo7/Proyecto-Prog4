@@ -6,12 +6,12 @@
 #include <string.h>
 #include <stdbool.h>
 #include "colors/colors.h"
+#include "bbdd/sqlite/sqlite3.h"
 
 #define MAX_USUARIO 50
-#define MAX_CONTRASENA     50
-#define USUARIOS_FILE     "../data/usuarios.txt"
+#define MAX_CONTRASENA 50
 
-typedef enum {EMPLEADO ,ADMINISTRADOR} Rol;
+typedef enum {EMPLEADO, ADMINISTRADOR} Rol;
 
 typedef struct {
     int id;
@@ -27,7 +27,7 @@ typedef struct {
 } RegistroUsuarios;
 
 /**
- * Crea e inicializa un registro de usuarios.
+ * Crea e inicializa un registro de usuarios en memoria.
  * @return RegistroUsuarios* Retorna un puntero al registro creado o NULL en caso de error.
  */
 RegistroUsuarios* crearRegistroUsuarios(void);
@@ -39,42 +39,36 @@ RegistroUsuarios* crearRegistroUsuarios(void);
 void liberarRegistroUsuarios(RegistroUsuarios* reg);
 
 /**
- * Carga los usuarios desde el fichero definido en USUARIOS_FILE.
+ * Carga los usuarios desde la base de datos SQLite.
  * @param reg Puntero al registro donde se cargarán los usuarios.
+ * @param db Puntero a la base de datos.
  * @return int Retorna 0 en caso de éxito o -1 en caso de error.
  */
-int cargarUsuarios(RegistroUsuarios* reg);
+int cargarUsuariosDB(RegistroUsuarios* reg, sqlite3* db);
 
 /**
- * Guarda los usuarios en el fichero definido en USUARIOS_FILE.
- * @param reg Puntero al registro de usuarios a guardar.
- * @return int Retorna 0 en caso de éxito o -1 en caso de error.
- */
-int guardarUsuarios(const RegistroUsuarios* reg);
-
-/**
- * Registra un nuevo usuario en el registro.
- * @param reg Puntero al registro de usuarios.
+ * Registra un nuevo usuario en la base de datos SQLite.
+ * @param db Puntero a la base de datos.
  * @param usuario Nombre de usuario.
  * @param contrasena Contraseña del usuario.
  * @param rol Rol del usuario (EMPLEADO o ADMINISTRADOR).
  * @return int Retorna 0 en caso de éxito o -1 en caso de error.
  */
-int registrarUsuario(RegistroUsuarios* reg, const char* usuario, const char* contrasena, Rol rol);
+int registrarUsuarioDB(sqlite3* db, const char* usuario, const char* contrasena, Rol rol);
 
 /**
- * Autentica un usuario, solicitando nombre y contraseña.
- * @param reg Puntero al registro de usuarios.
+ * Autentica un usuario en la base de datos SQLite.
+ * @param db Puntero a la base de datos.
  * @param usuario Nombre de usuario.
  * @param contrasena Contraseña ingresada.
  * @return Usuario* Retorna un puntero al usuario autenticado o NULL si la autenticación falla.
  */
-Usuario* autenticarUsuario(const RegistroUsuarios* reg, const char* usuario, const char* contrasena);
+Usuario* autenticarUsuarioDB(sqlite3* db, const char* usuario, const char* contrasena);
 
 /**
- * Menú interactivo para registrar un nuevo usuario.
- * @param reg Puntero al registro de usuarios.
+ * Menú interactivo para registrar un nuevo usuario utilizando la base de datos.
+ * @param db Puntero a la base de datos.
  */
-void menuRegistrarUsuario(RegistroUsuarios* reg);
+void menuRegistrarUsuarioDB(sqlite3* db);
 
-#endif
+#endif /* USUARIOS_H */

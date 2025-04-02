@@ -55,7 +55,7 @@ El proyecto se puede compilar y depurar utilizando los archivos de configuració
 Si deseas compilar desde la terminal, puedes usar un comando similar a:
 
 ```bash
-gcc -g -I. main.c admin_cliente/admin_cliente.c inventario/inventario.c login/login.c transacciones/transacciones.c usuarios/usuarios.c -o main.exe
+ gcc -g -I. -I./bbdd -I./src src/main.c src/admin_cliente/admin_cliente.c src/inventario/inventario.c src/login/login.c src/transacciones/transacciones.c src/usuarios/usuarios.c bbdd/db_init/db_init.c bbdd/sqlite/sqlite3.c -o main.exe
 ```
 
 ### Ejecución Manual

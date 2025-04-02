@@ -1,11 +1,18 @@
-#ifndef ADMIN_CLIENT_H_
-#define ADMIN_CLIENT_H_
+#ifndef ADMIN_CLIENT_H
+#define ADMIN_CLIENT_H
 
 #include <stdio.h>
 #include "colors/colors.h"
+#include "bbdd/sqlite/sqlite3.h"
 
-void solicitarInforme(void);
+/**
+ * Función para solicitar un informe, que podría utilizar la BD para generar datos.
+ */
+void solicitarInformeDB(sqlite3* db);
 
-void menuAdminClient(void);
+/**
+ * Menú interactivo para el módulo de administración avanzada utilizando la base de datos.
+ */
+void menuAdminClientDB(sqlite3* db);
 
-#endif /* ADMIN_CLIENTE_H_ */
+#endif /* ADMIN_CLIENT_H */

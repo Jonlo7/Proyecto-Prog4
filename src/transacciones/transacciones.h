@@ -7,9 +7,9 @@
 #include <stdbool.h>
 #include "colors/colors.h"
 #include "inventario/inventario.h"
+#include "bbdd/sqlite/sqlite3.h"
 
 #define MAX_FECHA 11 //YYYY-MM-DD
-#define TRANSACCIONES_FILE "../data/ventas.txt"
 
 typedef enum {VENTA, COMPRA} tipoTransaccion;
 
@@ -28,7 +28,6 @@ typedef struct {
     tipoTransaccion tipo;
 } Transaccion;
 
-
 /**
  * Crea e inicializa una nueva transacción.
  * @return Puntero a la transacción creada o NULL en caso de error.
@@ -37,7 +36,7 @@ Transaccion* crearTransaccion(void);
 
 /**
  * Libera la memoria asignada a una transacción.
- * @param Puntero a la transacción a liberar.
+ * @param trans Puntero a la transacción a liberar.
  */
 void liberarTransaccion(Transaccion* trans);
 
@@ -57,15 +56,18 @@ int agregarItemTransaccion(Transaccion* trans, Producto prod, int cantidad);
 void calcularTotalTransaccion(Transaccion* trans);
 
 /**
- * Guarda la transacción en el fichero de ventas.
+ * Guarda la transacción en la base de datos SQLite.
+ * @param db Puntero a la base de datos.
  * @param trans Puntero a la transacción.
  * @return int Retorna 0 en caso de éxito o -1 en caso de error.
  */
-int guardarTransaccion(const Transaccion* trans);
+int guardarTransaccionDB(sqlite3* db, const Transaccion* trans);
 
 /**
  * Menú interactivo para crear una transacción.
+ * @param inv Puntero al inventario.
+ * @param db Puntero a la base de datos.
  */
-void menuCrearTransaccion(Inventario* inv);
+void menuCrearTransaccionDB(Inventario* inv, sqlite3* db);
 
-#endif
+#endif /* TRANSACCIONES_H */

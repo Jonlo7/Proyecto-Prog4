@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "colors/colors.h"
+#include "bbdd/sqlite/sqlite3.h"
 
 #define MAX_NOMBRE 50
 
@@ -15,7 +16,7 @@ typedef struct {
     float precio;
     int stock;
     bool activo;
-}Producto;
+} Producto;
 
 typedef struct {
     Producto* productos;   
@@ -24,7 +25,7 @@ typedef struct {
 } Inventario;
 
 /**
- * Crea e inicializa un inventario.
+ * Crea e inicializa un inventario en memoria.
  * @return Retorna un puntero al inventario creado o NULL en caso de error.
  */
 Inventario* crearInventario(void);
@@ -36,33 +37,15 @@ Inventario* crearInventario(void);
 void liberarInventario(Inventario* inv);
 
 /**
- * Carga el inventario desde un fichero de texto.
+ * Carga el inventario desde la base de datos SQLite.
  * @param inv Puntero al inventario a cargar.
- * @param filename Nombre del fichero desde el cual cargar el inventario.
+ * @param db Puntero a la base de datos.
  * @return Retorna 0 en caso de éxito o un valor distinto en caso de error.
  */
-int cargarInventario(Inventario* inv);
+int cargarInventarioDB(Inventario* inv, sqlite3* db);
 
 /**
- * Guarda el inventario en un fichero de texto, sobreescribiendo el contenido anterior.
- * @param inv Puntero al inventario a guardar.
- * @return Retorna 0 en caso de éxito o un valor distinto en caso de error.
- */
-int guardarInventario(const Inventario* inv);
-
-/**
- * Agrega un nuevo producto al inventario.
- * @param inv Puntero al inventario.
- * @param nombre Nombre del producto.
- * @param precio Precio del producto.
- * @param stock Stock del producto.
- * @param activo Estado activo del producto (true o false).
- * @return Retorna 0 en caso de éxito o un valor distinto en caso de error.
- */
-int agregarProducto(Inventario* inv, const char* nombre, float precio, int stock, bool activo);
-
-/**
- * Busca un producto por id en el inventario.
+ * Busca un producto por su ID en el inventario.
  * @param inv Puntero al inventario.
  * @param id ID del producto a buscar.
  * @return Retorna un puntero al producto encontrado o NULL si no se encuentra.
@@ -70,45 +53,59 @@ int agregarProducto(Inventario* inv, const char* nombre, float precio, int stock
 Producto* buscarProducto(Inventario* inv, int id);
 
 /**
- * Modifica los datos de un producto existente.
- * @param inv Puntero al inventario.
+ * Inserta un nuevo producto en la base de datos SQLite.
+ * @param db Puntero a la base de datos.
+ * @param nombre Nombre del producto.
+ * @param precio Precio del producto.
+ * @param stock Stock del producto.
+ * @param activo Estado activo del producto (true o false).
+ * @return Retorna 0 en caso de éxito o un valor distinto en caso de error.
+ */
+int insertarProductoDB(sqlite3* db, const char* nombre, float precio, int stock, bool activo);
+
+/**
+ * Modifica los datos de un producto existente en la base de datos.
+ * @param db Puntero a la base de datos.
  * @param id ID del producto a modificar.
  * @param nuevoNombre Nuevo nombre del producto (puede ser NULL para no modificarlo).
  * @param nuevoPrecio Nuevo precio del producto (puede ser -1 para no modificarlo).
  * @param nuevoStock Nuevo stock del producto (puede ser -1 para no modificarlo).
- * @param nuevoActivo Nuevo estado activo del producto (puede ser -1 para no modificarlo).
+ * @param nuevoActivo Nuevo estado activo del producto.
  * @return Retorna 0 en caso de éxito o un valor distinto en caso de error.
  */
-int modificarProducto(Inventario* inv, int id, const char* nuevoNombre, float nuevoPrecio, int nuevoStock, bool nuevoActivo);
+int modificarProductoDB(sqlite3* db, int id, const char* nuevoNombre, float nuevoPrecio, int nuevoStock, bool nuevoActivo);
 
 /**
- * Actualiza el stock de un producto (por ejemplo, en operaciones de venta o compra).
- * @param inv Puntero al inventario.
+ * Actualiza el stock de un producto en la base de datos.
+ * @param db Puntero a la base de datos.
  * @param id ID del producto a actualizar.
  * @param cantidad Cantidad a agregar (puede ser negativa para restar).
  * @return Retorna 0 en caso de éxito o un valor distinto en caso de error.
  */
-int actualizarStock(Inventario* inv, int id, int cantidad);
+int actualizarStockDB(sqlite3* db, int id, int cantidad);
 
 /**
- * Imprime el listado de productos activos del inventario.
- * @param inv Puntero al inventario.
+ * Imprime el listado de productos activos desde la base de datos.
+ * @param db Puntero a la base de datos.
  */
-void listarProductos(const Inventario* inv);
+void listarProductosDB(sqlite3* db);
 
 /**
- * Menú interactivo para agregar un nuevo producto.
+ * Menú interactivo para agregar un nuevo producto utilizando la base de datos.
+ * @param db Puntero a la base de datos.
  */
-void menuAgregarProducto(Inventario* inv);
+void menuAgregarProductoDB(sqlite3* db);
 
 /**
- * Menú interactivo para actualizar el stock de un producto.
+ * Menú interactivo para actualizar el stock de un producto utilizando la base de datos.
+ * @param db Puntero a la base de datos.
  */
-void menuActualizarStock(Inventario* inv);
+void menuActualizarStockDB(sqlite3* db);
 
 /**
- * Menú interactivo para modificar un producto.
+ * Menú interactivo para modificar un producto utilizando la base de datos.
+ * @param db Puntero a la base de datos.
  */
-void menuModificarProducto(Inventario* inv);
+void menuModificarProductoDB(sqlite3* db);
 
-#endif
+#endif /* INVENTARIO_H */

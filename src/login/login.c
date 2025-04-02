@@ -2,9 +2,9 @@
 #include <string.h>
 #include "login/login.h"
 #include "usuarios/usuarios.h"
+#include "bbdd/sqlite/sqlite3.h"
 
-
-Usuario* realizarLogin(RegistroUsuarios* reg) {
+Usuario* realizarLoginDB(RegistroUsuarios* reg, sqlite3* db) {
     char usuario[MAX_USUARIO + 1];
     char contrasena[MAX_CONTRASENA + 1];
     
@@ -18,11 +18,12 @@ Usuario* realizarLogin(RegistroUsuarios* reg) {
     printf("Ingrese la contrasenya: ");
     scanf(" %[^\n]", contrasena);
     
-    return autenticarUsuario(reg, usuario, contrasena);
+    // Se utiliza la versión DB para autenticar, que debería estar implementada en usuarios/usuarios.c
+    return autenticarUsuarioDB(db, usuario, contrasena);
 }
 
-void menuLogin(RegistroUsuarios* reg) {
-    Usuario* user = realizarLogin(reg);
+void menuLoginDB(RegistroUsuarios* reg, sqlite3* db) {
+    Usuario* user = realizarLoginDB(reg, db);
     if (user) {
         printf("\n \033[1;32mLogin exitoso. Bienvenido %s.\033[0m\n", user->usuario);
     } else {
