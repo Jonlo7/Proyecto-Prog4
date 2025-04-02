@@ -91,7 +91,14 @@ void menuCrearTransaccion(Inventario* inv) {
     printf("1. Venta\n");
     printf("2. Compra\n");
     printf("Ingrese su opcion: ");
-    scanf("%d", &opcionTipo);
+    int resultado = scanf("%d", &opcionTipo);
+        if (resultado != 1) {
+            while (getchar() != '\n'); 
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n"); 
+        }
+        if (opcionTipo < 1 || opcionTipo > 2) {
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n"); 
+        }
     trans->tipo = (opcionTipo == 1) ? VENTA : COMPRA;
     
     printf("Ingrese la fecha (YYYY-MM-DD): ");
@@ -116,12 +123,24 @@ void menuCrearTransaccion(Inventario* inv) {
             scanf("%d", &cantidad);
             if (agregarItemTransaccion(trans, *prod, cantidad) == 0)
                 printf("\n \033[1;32mItem agregado exitosamente.\033[0m\n");
+                if (guardarInventario(inv) != 0) {
+            printf("\033[1;31mError al guardar el inventario en el fichero.\033[0m\n");
+        }
             else
                 printf("\n \033[1;31mError al agregar el item.\033[0m\n");
         }
         
         printf("¿Desea agregar otro producto? (1: Sí, 0: No): ");
-        scanf("%d", &continuar);
+        int resultado = scanf("%d", &continuar);
+        if (resultado != 1) {
+            while (getchar() != '\n'); 
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue; 
+        }
+        if (continuar < 1 || continuar > 2) {
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue;
+        }
     }
 
     calcularTotalTransaccion(trans);

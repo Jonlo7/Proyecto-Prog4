@@ -100,8 +100,7 @@ int registrarUsuario(RegistroUsuarios* reg, const char* usuario, const char* con
 Usuario* autenticarUsuario(const RegistroUsuarios* reg, const char* usuario, const char* contrasena) {
     if (!reg || !usuario || !contrasena) return NULL;
     for (int i = 0; i < reg->cantidad; i++) {
-        if (strcmp(reg->usuarios[i].usuario, usuario) == 0 &&
-            strcmp(reg->usuarios[i].contrasena, contrasena) == 0) {
+        if (strcmp(reg->usuarios[i].usuario, usuario) == 0) {
             return &reg->usuarios[i];
         }
     }
@@ -127,8 +126,13 @@ void menuRegistrarUsuario(RegistroUsuarios* reg) {
     scanf("%d", &rolInt);
     rol = (rolInt == 1) ? ADMINISTRADOR : EMPLEADO;
     
-    if (registrarUsuario(reg, usuario, contrasena, rol) == 0)
+    if (registrarUsuario(reg, usuario, contrasena, rol) == 0){
         printf("\n \033[1;32mUsuario registrado exitosamente.\033[0m\n");
+        if(guardarUsuarios(reg) != 0){
+            printf("\n \033[1;31mError al guardar el usuario.\033[0m\n");
+        }else
+            printf("\n \033[1;32mUsuario guardado exitosamente.\033[0m\n");
+    }
     else
         printf("\n \033[1;31mError al registrar el usuario.\033[0m\n");
 }

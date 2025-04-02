@@ -171,6 +171,9 @@ void menuAgregarProducto(Inventario* inv) {
 
     if (agregarProducto(inv, nombre, precio, stock, activo) == 0)
         printf("\n \033[1;32mProducto agregado exitosamente.\033[0m\n");
+        if (guardarInventario(inv) != 0) {
+            printf("\033[1;31mError al guardar el inventario en el fichero.\033[0m\n");
+        }
     else
         printf("\n \033[1;31mError al agregar el producto.\033[0m\n");
 }
@@ -218,8 +221,16 @@ void menuModificarProducto(Inventario* inv) {
          printf("+--------------------------------------+\n");
          printf("\033[0m");
          printf("Seleccione una opcion: ");
-         scanf("%d", &opcion);
-         
+         int resultado = scanf("%d", &opcion);
+        if (resultado != 1) {
+            while (getchar() != '\n'); 
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue; 
+        }
+        if (opcion < 1 || opcion > 3) {
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue;
+        }
          switch(opcion) {
               case 1:
                    {

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <conio.h>
 #include "inventario.h"
 #include "usuarios.h"
 #include "transacciones.h"
@@ -18,11 +19,20 @@ void menuAdmin(RegistroUsuarios* reg, Inventario* inv) {
         printf("| 4. Modificar producto                |\n");
         printf("| 5. Crear transaccion                 |\n");
         printf("| 6. Registrar usuario                 |\n");
-        printf("| 7. Cerrar sesión                     |\n");
+        printf("| 7. Cerrar sesion                     |\n");
         printf("+--------------------------------------+\n");
         printf("\033[0m");
         printf("Seleccione una opcion: ");
-        scanf("%d", &opcion);
+        int resultado = scanf("%d", &opcion);
+        if (resultado != 1) {
+            while (getchar() != '\n'); 
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue; 
+        }
+        if (opcion < 1 || opcion > 3) {
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue;
+        }
         switch(opcion) {
             case 1:
                 listarProductos(inv);
@@ -61,11 +71,20 @@ void menuEmpleado(Inventario* inv) {
         printf("| 1. Listar productos                  |\n");
         printf("| 2. Actualizar stock                  |\n");
         printf("| 3. Crear transaccion                 |\n");
-        printf("| 4. Cerrar sesión                     |\n");
+        printf("| 4. Cerrar sesion                     |\n");
         printf("+--------------------------------------+\n");
         printf("\033[0m");
         printf("Seleccione una opcion: ");
-        scanf("%d", &opcion);
+        int resultado = scanf("%d", &opcion);
+        if (resultado != 1) {
+            while (getchar() != '\n'); 
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue; 
+        }
+        if (opcion < 1 || opcion > 3) {
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue;
+        }
         switch(opcion) {
             case 1:
                 listarProductos(inv);
@@ -117,7 +136,16 @@ int main(void) {
         printf("+--------------------------------------+\n");
         printf("\033[0m");
         printf("Seleccione una opcion: ");
-        scanf("%d", &opcion);
+        int resultado = scanf("%d", &opcion);
+        if (resultado != 1) {
+            while (getchar() != '\n'); 
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue; 
+        }
+        if (opcion < 1 || opcion > 3) {
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue;
+        }
         
         switch(opcion) {
             case 1: {
@@ -141,6 +169,7 @@ int main(void) {
                 break;
             default:
                 printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+                continue;
         }
     } while(opcion != 3);
     
