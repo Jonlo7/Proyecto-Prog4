@@ -1,4 +1,4 @@
-#include "usuarios.h"
+#include "usuarios/usuarios.h"
 
 RegistroUsuarios* crearRegistroUsuarios(void) {
     RegistroUsuarios* reg = malloc(sizeof(RegistroUsuarios));

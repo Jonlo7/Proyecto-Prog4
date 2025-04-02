@@ -5,10 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "colors.h"
+#include "colors/colors.h"
 
 #define MAX_NOMBRE 50
-#define PRODUCTOS_FILE "../data/productos.txt"
 
 typedef struct {
     int id;

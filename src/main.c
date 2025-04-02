@@ -1,9 +1,9 @@
 #include <stdio.h>
-#include "inventario.h"
-#include "usuarios.h"
-#include "transacciones.h"
-#include "login.h"
-#include "colors.h"
+#include "inventario/inventario.h"
+#include "usuarios/usuarios.h"
+#include "transacciones/transacciones.h"
+#include "login/login.h"
+#include "colors/colors.h"
 
 void menuAdmin(RegistroUsuarios* reg, Inventario* inv) {
     int opcion = 0;

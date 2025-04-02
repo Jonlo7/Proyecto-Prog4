@@ -1,4 +1,4 @@
-#include "transacciones.h"
+#include "transacciones/transacciones.h"
 
 Transaccion* crearTransaccion(void) {
     Transaccion* trans = malloc(sizeof(Transaccion));

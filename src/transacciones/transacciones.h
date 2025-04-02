@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "colors.h"
-#include "inventario.h"
+#include "colors/colors.h"
+#include "inventario/inventario.h"
 
 #define MAX_FECHA 11 //YYYY-MM-DD
 #define TRANSACCIONES_FILE "../data/ventas.txt"

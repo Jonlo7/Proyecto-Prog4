@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "colors.h"
+#include "colors/colors.h"
 
 #define MAX_USUARIO 50
 #define MAX_CONTRASENA     50

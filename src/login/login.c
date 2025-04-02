@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-#include "login.h"
-#include "usuarios.h"
+#include "login/login.h"
+#include "usuarios/usuarios.h"
 
 
 Usuario* realizarLogin(RegistroUsuarios* reg) {

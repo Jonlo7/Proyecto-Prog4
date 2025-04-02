@@ -55,7 +55,7 @@ El proyecto se puede compilar y depurar utilizando los archivos de configuració
 Si deseas compilar desde la terminal, puedes usar un comando similar a:
 
 ```bash
-gcc admin_cliente.c main.c inventario.c login.c transacciones.c usuarios.c -o main.exe
+gcc -g -I. main.c admin_cliente/admin_cliente.c inventario/inventario.c login/login.c transacciones/transacciones.c usuarios/usuarios.c -o main.exe
 ```
 
 ### Ejecución Manual

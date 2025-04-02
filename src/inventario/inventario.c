@@ -1,4 +1,4 @@
-#include "inventario.h"
+#include "inventario/inventario.h"
 
 Inventario* crearInventario(void) {
     Inventario* inv = malloc(sizeof(Inventario));
