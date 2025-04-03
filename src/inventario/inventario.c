@@ -1,4 +1,5 @@
 #include "inventario/inventario.h"
+#include "bbdd/sqlite/sqlite3.h"
 
 Inventario* crearInventario(void) {
     Inventario* inv = malloc(sizeof(Inventario));
@@ -145,14 +146,13 @@ int modificarProductoDB(sqlite3* db, int id, const char* nuevoNombre, float nuev
 }
 
 /**
- * Actualiza el stock de un producto (por ejemplo, en operaciones de venta o compra) en la base de datos SQLite.
+ * Actualiza el stock de un producto en la base de datos SQLite.
  * @param db Puntero a la base de datos.
  * @param id ID del producto a actualizar.
  * @param cantidad Cantidad a agregar (puede ser negativa para restar).
  * @return Retorna 0 en caso de éxito o un valor distinto en caso de error.
  */
 int actualizarStockDB(sqlite3* db, int id, int cantidad) {
-    // Obtenemos el stock actual
     const char* sqlSelect = "SELECT stock FROM productos WHERE id = ?;";
     sqlite3_stmt* stmtSelect;
     int rc = sqlite3_prepare_v2(db, sqlSelect, -1, &stmtSelect, NULL);
@@ -312,9 +312,17 @@ void menuModificarProductoDB(sqlite3* db) {
          printf("| 5. Terminar edición y guardar        |\n");
          printf("+--------------------------------------+\n");
          printf("\033[0m");
-         printf("Seleccione una opcion: ");
-         scanf("%d", &opcion);
-         
+         printf("Seleccione una opción: ");
+         int resultado = scanf("%d", &opcion);
+        if (resultado != 1) {
+            while (getchar() != '\n'); 
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue; 
+        }
+        if (opcion < 1 || opcion > 5) {
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue;
+        }
          switch(opcion) {
               case 1: {
                   float nuevoPrecio;

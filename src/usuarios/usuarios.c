@@ -1,10 +1,11 @@
 #include "usuarios/usuarios.h"
+#include "bbdd/sqlite/sqlite3.h"  // Asegúrate de que la ruta sea correcta
 
 RegistroUsuarios* crearRegistroUsuarios(void) {
     RegistroUsuarios* reg = malloc(sizeof(RegistroUsuarios));
     if (!reg) return NULL;
     reg->cantidad = 0;
-    reg->capacidad = 5; 
+    reg->capacidad = 5;
     reg->usuarios = malloc(reg->capacidad * sizeof(Usuario));
     if (!reg->usuarios) {
         free(reg);
@@ -156,7 +157,7 @@ void menuRegistrarUsuarioDB(sqlite3* db) {
     rol = (rolInt == 1) ? ADMINISTRADOR : EMPLEADO;
     
     if (registrarUsuarioDB(db, usuario, contrasena, rol) == 0)
-        printf("\n \033[1;32mUsuario registrado exitosamente.\033[0m\n");
+        printf("\n \033[1;32mUsuario registrado y guardado exitosamente.\033[0m\n");
     else
         printf("\n \033[1;31mError al registrar el usuario.\033[0m\n");
 }

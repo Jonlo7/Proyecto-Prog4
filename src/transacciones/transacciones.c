@@ -139,7 +139,18 @@ void menuCrearTransaccionDB(Inventario* inv, sqlite3* db) {
     printf("1. Venta\n");
     printf("2. Compra\n");
     printf("Ingrese su opción: ");
-    scanf("%d", &opcionTipo);
+    int resultado = scanf("%d", &opcionTipo);
+    if (resultado != 1) {
+        while (getchar() != '\n'); 
+        printf("\n \033[1;31mOpción inválida. Intente de nuevo.\033[0m\n");
+        liberarTransaccion(trans);
+        return;
+    }
+    if (opcionTipo < 1 || opcionTipo > 2) {
+        printf("\n \033[1;31mOpción inválida. Intente de nuevo.\033[0m\n");
+        liberarTransaccion(trans);
+        return;
+    }
     trans->tipo = (opcionTipo == 1) ? VENTA : COMPRA;
     
     printf("Ingrese la fecha (YYYY-MM-DD): ");
@@ -169,7 +180,12 @@ void menuCrearTransaccionDB(Inventario* inv, sqlite3* db) {
         }
         
         printf("¿Desea agregar otro producto? (1: Sí, 0: No): ");
-        scanf("%d", &continuar);
+        resultado = scanf("%d", &continuar);
+        if (resultado != 1) {
+            while(getchar() != '\n'); 
+            printf("\n \033[1;31mOpción inválida. Intente de nuevo.\033[0m\n");
+            continue; 
+        }
     }
     
     calcularTotalTransaccion(trans);
