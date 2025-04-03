@@ -14,8 +14,17 @@ void menuAdminClientDB(sqlite3* db) {
         printf("| 4. Salir                             |\n");
         printf("+--------------------------------------+\n");
         printf("\033[0m");
-        printf("Seleccione una opción: ");
-        scanf("%d", &opcion);
+        printf("Seleccione una opcion: ");
+        int resultado = scanf("%d", &opcion);
+        if (resultado != 1) {
+            while (getchar() != '\n'); 
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue; 
+        }
+        if (opcion < 1 || opcion > 3) {
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue;
+        }
         switch(opcion) {
             case 1:
                 printf("\n \033[1;32mFuncionalidad de informes pendiente de implementacion.\033[0m\n");

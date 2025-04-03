@@ -20,11 +20,20 @@ void menuAdminDB(RegistroUsuarios* reg, Inventario* inv, sqlite3* db) {
         printf("| 4. Modificar producto                |\n");
         printf("| 5. Crear transacción                 |\n");
         printf("| 6. Registrar usuario                 |\n");
-        printf("| 7. Cerrar sesión                     |\n");
+        printf("| 7. Cerrar sesion                     |\n");
         printf("+--------------------------------------+\n");
         printf("\033[0m");
-        printf("Seleccione una opción: ");
-        scanf("%d", &opcion);
+        printf("Seleccione una opcion: ");
+        int resultado = scanf("%d", &opcion);
+        if (resultado != 1) {
+            while (getchar() != '\n'); 
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue; 
+        }
+        if (opcion < 1 || opcion > 3) {
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue;
+        }
         switch(opcion) {
             case 1:
                 listarProductosDB(db);
@@ -63,12 +72,21 @@ void menuEmpleadoDB(Inventario* inv, sqlite3* db) {
         printf("+--------------------------------------+\n");
         printf("| 1. Listar productos                  |\n");
         printf("| 2. Actualizar stock                  |\n");
-        printf("| 3. Crear transacción                 |\n");
-        printf("| 4. Cerrar sesión                     |\n");
+        printf("| 3. Crear transaccion                 |\n");
+        printf("| 4. Cerrar sesion                     |\n");
         printf("+--------------------------------------+\n");
         printf("\033[0m");
-        printf("Seleccione una opción: ");
-        scanf("%d", &opcion);
+        printf("Seleccione una opcion: ");
+        int resultado = scanf("%d", &opcion);
+        if (resultado != 1) {
+            while (getchar() != '\n'); 
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue; 
+        }
+        if (opcion < 1 || opcion > 3) {
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue;
+        }
         switch(opcion) {
             case 1:
                 listarProductosDB(db);
@@ -139,8 +157,17 @@ int main(void) {
         printf("| 3. Salir                             |\n");
         printf("+--------------------------------------+\n");
         printf("\033[0m");
-        printf("Seleccione una opción: ");
-        scanf("%d", &opcion);
+        printf("Seleccione una opcion: ");
+        int resultado = scanf("%d", &opcion);
+        if (resultado != 1) {
+            while (getchar() != '\n'); 
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue; 
+        }
+        if (opcion < 1 || opcion > 3) {
+            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+            continue;
+        }
         
         switch(opcion) {
             case 1: {
@@ -164,7 +191,8 @@ int main(void) {
                 printf("Saliendo de la aplicación...\n");
                 break;
             default:
-                printf("\n \033[1;31mOpción inválida. Intente de nuevo.\033[0m\n");
+                printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+                continue;
         }
     } while(opcion != 3);
     
