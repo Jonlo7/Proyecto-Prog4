@@ -30,7 +30,7 @@ void menuAdminDB(RegistroUsuarios* reg, Inventario* inv, sqlite3* db) {
             printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
             continue; 
         }
-        if (opcion < 1 || opcion > 3) {
+        if (opcion < 1 || opcion > 7) {
             printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
             continue;
         }
@@ -83,7 +83,7 @@ void menuEmpleadoDB(Inventario* inv, sqlite3* db) {
             printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
             continue; 
         }
-        if (opcion < 1 || opcion > 3) {
+        if (opcion < 1 || opcion > 4) {
             printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
             continue;
         }
