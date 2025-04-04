@@ -129,13 +129,26 @@ Al finalizar, se calcula el total de la transacción y se guarda en el fichero d
 
 ---
 
-## Persistencia de Datos
+Aquí tienes un ejemplo actualizado para el apartado "Persistencia de Datos" en el README:
 
-Los ficheros de datos se encuentran en la carpeta `data/` y son los siguientes:
+---
 
-- **productos.txt:** Contiene la lista de productos con su estado (activo/inactivo).
-- **ventas.txt:** Registra las transacciones realizadas, incluyendo la fecha y el total de cada una.
-- **usuarios.txt:** Almacena los usuarios registrados, sus contraseñas y roles.
+**Persistencia de Datos**
+
+El sistema utiliza **SQLite** para mantener la persistencia de los datos, en lugar de utilizar ficheros de texto. La base de datos se crea (o actualiza) automáticamente al ejecutar la aplicación y se almacena en un único archivo (por ejemplo, `inventario.sqlite`). Las principales tablas de la base de datos son:
+
+- **productos:**  
+  Contiene la lista de productos, con campos para el identificador, nombre, precio, stock y estado (activo/inactivo).
+
+- **transacciones:**  
+  Registra las transacciones realizadas (ventas o compras), incluyendo el tipo, la fecha y el total de la transacción.
+
+- **items_transaccion:**  
+  Almacena los ítems asociados a cada transacción, indicando el producto, la cantidad, el precio unitario y el total por ítem.  
+  (Esta tabla se relaciona con la tabla de transacciones a través de una clave foránea).
+
+- **usuarios:**  
+  Guarda los datos de los usuarios registrados, incluyendo el nombre de usuario, la contraseña y el rol (administrador o empleado).
 
 ---
 
