@@ -196,7 +196,7 @@ int actualizarStockDB(sqlite3* db, int id, int cantidad) {
  * @param db Puntero a la base de datos.
  */
 void listarProductosDB(sqlite3* db) {
-    const char* sql = "SELECT id, nombre, precio, stock FROM productos WHERE activo = 1;";
+    const char* sql = "SELECT id, nombre, precio, stock, activo FROM productos;";
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
@@ -208,14 +208,15 @@ void listarProductosDB(sqlite3* db) {
     printf("|       LISTADO DE PRODUCTOS           |\n");
     printf("+--------------------------------------+\n");
     printf("\033[0m");
-    printf("ID\tNombre\t\t\tPrecio\tStock\n");
-    printf("-------------------------------------------------\n");
+    printf("ID\tNombre\t\t\tPrecio\tStock\tEstado\n");
+    printf("-------------------------------------------------------\n");
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
         int id = sqlite3_column_int(stmt, 0);
         const unsigned char* nombre = sqlite3_column_text(stmt, 1);
         float precio = (float)sqlite3_column_double(stmt, 2);
         int stock = sqlite3_column_int(stmt, 3);
-        printf("%d\t%-20s\t%.2f\t%d\n", id, nombre, precio, stock);
+        const char* estado =sqlite3_column_int(stmt, 4) ? "Activo" : "Inactivo";
+        printf("%d\t%-20s\t%.2f\t%d\t%s\n", id, nombre, precio, stock, estado);
     }
     sqlite3_finalize(stmt);
 }
