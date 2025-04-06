@@ -1,0 +1,5 @@
+# Ignorar archivos específicos de IDE
+.vscode/
+
+# Ignorar archivos de compilación
+main.exe

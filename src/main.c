@@ -1,12 +1,12 @@
-#include <stdio.h>
-#include <conio.h>
-#include "inventario.h"
-#include "usuarios.h"
-#include "transacciones.h"
-#include "login.h"
-#include "colors.h"
+#include "inventario/inventario.h"
+#include "usuarios/usuarios.h"
+#include "transacciones/transacciones.h"
+#include "login/login.h"
+#include "colors/colors.h"
+#include "bbdd/sqlite/sqlite3.h"
+#include "bbdd/db_init/db_init.h"
 
-void menuAdmin(RegistroUsuarios* reg, Inventario* inv) {
+void menuAdminDB(RegistroUsuarios* reg, Inventario* inv, sqlite3* db) {
     int opcion = 0;
     do {
         printf("\n\033[1;35m");
@@ -29,28 +29,28 @@ void menuAdmin(RegistroUsuarios* reg, Inventario* inv) {
             printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
             continue; 
         }
-        if (opcion < 1 || opcion > 3) {
+        if (opcion < 1 || opcion > 7) {
             printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
             continue;
         }
         switch(opcion) {
             case 1:
-                listarProductos(inv);
+                listarProductosDB(db);
                 break;
             case 2:
-                menuAgregarProducto(inv);
+                menuAgregarProductoDB(db);
                 break;
             case 3:
-                menuActualizarStock(inv);
+                menuActualizarStockDB(db);
                 break;
             case 4:
-                menuModificarProducto(inv);
+                menuModificarProductoDB(db);
                 break;
             case 5:
-                menuCrearTransaccion(inv);
+                menuCrearTransaccionDB(inv, db);
                 break;
             case 6:
-                menuRegistrarUsuario(reg);
+                menuRegistrarUsuarioDB(db);
                 break;
             case 7:
                 printf("Cerrando sesion...\n");
@@ -61,7 +61,7 @@ void menuAdmin(RegistroUsuarios* reg, Inventario* inv) {
     } while(opcion != 7);
 }
 
-void menuEmpleado(Inventario* inv) {
+void menuEmpleadoDB(Inventario* inv, sqlite3* db) {
     int opcion = 0;
     do {
         printf("\n\033[1;35m");
@@ -81,19 +81,19 @@ void menuEmpleado(Inventario* inv) {
             printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
             continue; 
         }
-        if (opcion < 1 || opcion > 3) {
+        if (opcion < 1 || opcion > 4) {
             printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
             continue;
         }
         switch(opcion) {
             case 1:
-                listarProductos(inv);
+                listarProductosDB(db);
                 break;
             case 2:
-                menuActualizarStock(inv);
+                menuActualizarStockDB(db);
                 break;
             case 3:
-                menuCrearTransaccion(inv);
+                menuCrearTransaccionDB(inv, db);
                 break;
             case 4:
                 printf("Cerrando sesion...\n");
@@ -104,13 +104,28 @@ void menuEmpleado(Inventario* inv) {
     } while(opcion != 4);
 }
 
+
 int main(void) {
+    sqlite3* db;
+    int rc = sqlite3_open("inventario.sqlite", &db);
+    if (rc != SQLITE_OK) {
+        printf("\n \033[1;31mError al abrir la base de datos: %s\033[0m\n", sqlite3_errmsg(db));
+        return 1;
+    }
+    
+    if (inicializarBaseDatos(db) != 0) {
+        printf("\n \033[1;31mError al inicializar la base de datos.\033[0m\n");
+        sqlite3_close(db);
+        return 1;
+    }
+    
     Inventario* inv = crearInventario();
     if (!inv) {
         printf("\n \033[1;31mError al crear el inventario.\033[0m\n");
+        sqlite3_close(db);
         return 1;
     }
-    if (cargarInventario(inv) != 0) {
+    if (cargarInventarioDB(inv, db) != 0) {
         printf("\n \033[1;31mError al cargar el inventario.\033[0m\n");
     }
     
@@ -118,9 +133,10 @@ int main(void) {
     if (!reg) {
         printf("\n \033[1;31mError al crear el registro de usuarios.\033[0m\n");
         liberarInventario(inv);
+        sqlite3_close(db);
         return 1;
     }
-    if (cargarUsuarios(reg) != 0) {
+    if (cargarUsuariosDB(reg, db) != 0) {
         printf("\n \033[1;31mError al cargar los usuarios.\033[0m\n");
     }
     
@@ -149,20 +165,20 @@ int main(void) {
         
         switch(opcion) {
             case 1: {
-                Usuario* user = realizarLogin(reg);
+                Usuario* user = realizarLoginDB(reg, db);
                 if (user) {
                     printf("\n \033[1;32mLogin exitoso. Bienvenido %s.\033[0m\n", user->usuario);
                     if (user->rol == ADMINISTRADOR)
-                        menuAdmin(reg, inv);
+                        menuAdminDB(reg, inv, db);
                     else
-                        menuEmpleado(inv);
+                        menuEmpleadoDB(inv, db);
                 } else {
                     printf("\n \033[1;31mError de login. Credenciales incorrectas.\033[0m\n");
                 }
                 break;
             }
             case 2:
-                menuRegistrarUsuario(reg);
+                menuRegistrarUsuarioDB(db);
                 break;
             case 3:
                 printf("Saliendo de la aplicacion...\n");
@@ -173,15 +189,9 @@ int main(void) {
         }
     } while(opcion != 3);
     
-    if (guardarInventario(inv) != 0) {
-        printf("\n \033[1;31mError al guardar el inventario.\033[0m\n");
-    }
-    if (guardarUsuarios(reg) != 0) {
-        printf("\n \033[1;31mError al guardar los usuarios.\033[0m\n");
-    }
-    
     liberarRegistroUsuarios(reg);
     liberarInventario(inv);
+    sqlite3_close(db);
     
     return 0;
 }

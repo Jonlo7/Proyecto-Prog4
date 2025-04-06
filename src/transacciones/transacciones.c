@@ -4,7 +4,7 @@ Transaccion* crearTransaccion(void) {
     Transaccion* trans = malloc(sizeof(Transaccion));
     if (!trans) return NULL;
     trans->numItems = 0;
-    trans->capacidadItems = 5; // Capacidad inicial para 5 ítems
+    trans->capacidadItems = 5;
     trans->items = malloc(trans->capacidadItems * sizeof(ItemTransaccion));
     if (!trans->items) {
         free(trans);
@@ -48,28 +48,73 @@ void calcularTotalTransaccion(Transaccion* trans) {
     trans->totalTransaccion = total;
 }
 
-int guardarTransaccion(const Transaccion* trans) {
-    if (!trans) return -1;
-    FILE* file = fopen(TRANSACCIONES_FILE, "a");
-    if (!file) return -1;
+/**
+ * Guarda la transacción en la base de datos SQLite.
+ * Se inserta primero la transacción en la tabla "transacciones" y luego cada uno de sus ítems en "items_transaccion".
+ * @param db Puntero a la base de datos.
+ * @param trans Puntero a la transacción.
+ * @return int Retorna 0 en caso de éxito o -1 en caso de error.
+ */
+int guardarTransaccionDB(sqlite3* db, const Transaccion* trans) {
+    if (!db || !trans) return -1;
     
-    const char* tipoStr = (trans->tipo == VENTA) ? "VENTA" : "COMPRA";
-    fprintf(file, "%s|%s|%.2f|", tipoStr, trans->fecha, trans->totalTransaccion);
+    const char* sqlTrans = "INSERT INTO transacciones (tipo, fecha, total) VALUES (?, ?, ?);";
+    sqlite3_stmt* stmtTrans;
+    int rc = sqlite3_prepare_v2(db, sqlTrans, -1, &stmtTrans, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Error preparando INSERT transaccion: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
+
+    sqlite3_bind_text(stmtTrans, 1, (trans->tipo == VENTA) ? "VENTA" : "COMPRA", -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmtTrans, 2, trans->fecha, -1, SQLITE_STATIC);
+    sqlite3_bind_double(stmtTrans, 3, trans->totalTransaccion);
+    
+    rc = sqlite3_step(stmtTrans);
+    if (rc != SQLITE_DONE) {
+        fprintf(stderr, "Error insertando transaccion: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmtTrans);
+        return -1;
+    }
+    sqlite3_finalize(stmtTrans);
+    
+    long transaccionId = sqlite3_last_insert_rowid(db);
+    
+    const char* sqlItem = "INSERT INTO items_transaccion (transaccion_id, producto_id, cantidad, precio_unitario, total_item) "
+                          "VALUES (?, ?, ?, ?, ?);";
+    sqlite3_stmt* stmtItem;
+    rc = sqlite3_prepare_v2(db, sqlItem, -1, &stmtItem, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Error preparando INSERT item: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
     
     for (int i = 0; i < trans->numItems; i++) {
-        const ItemTransaccion* item = &trans->items[i];
-        fprintf(file, "%d,%s,%d,%.2f,%.2f", 
-                item->producto.id, item->producto.nombre, 
-                item->cantidadTransaccion, item->producto.precio, item->totalItem);
-        if (i < trans->numItems - 1)
-            fprintf(file, ";");
+        sqlite3_bind_int(stmtItem, 1, (int)transaccionId);
+        sqlite3_bind_int(stmtItem, 2, trans->items[i].producto.id);
+        sqlite3_bind_int(stmtItem, 3, trans->items[i].cantidadTransaccion);
+        sqlite3_bind_double(stmtItem, 4, trans->items[i].producto.precio);
+        sqlite3_bind_double(stmtItem, 5, trans->items[i].totalItem);
+        
+        rc = sqlite3_step(stmtItem);
+        if (rc != SQLITE_DONE) {
+            fprintf(stderr, "Error insertando item de transaccion: %s\n", sqlite3_errmsg(db));
+            sqlite3_finalize(stmtItem);
+            return -1;
+        }
+        sqlite3_reset(stmtItem);
     }
-    fprintf(file, "\n");
-    fclose(file);
+    sqlite3_finalize(stmtItem);
+    
     return 0;
 }
 
-void menuCrearTransaccion(Inventario* inv) {
+/**
+ * Menú interactivo para crear una transacción utilizando la base de datos.
+ * @param inv Puntero al inventario.
+ * @param db Puntero a la base de datos.
+ */
+void menuCrearTransaccionDB(Inventario* inv, sqlite3* db) {
     if (!inv) {
         printf("\033[1;31mInventario no disponible.\033[0m\n");
         return;
@@ -92,13 +137,17 @@ void menuCrearTransaccion(Inventario* inv) {
     printf("2. Compra\n");
     printf("Ingrese su opcion: ");
     int resultado = scanf("%d", &opcionTipo);
-        if (resultado != 1) {
-            while (getchar() != '\n'); 
-            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n"); 
-        }
-        if (opcionTipo < 1 || opcionTipo > 2) {
-            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n"); 
-        }
+    if (resultado != 1) {
+        while (getchar() != '\n'); 
+        printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+        liberarTransaccion(trans);
+        return;
+    }
+    if (opcionTipo < 1 || opcionTipo > 2) {
+        printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+        liberarTransaccion(trans);
+        return;
+    }
     trans->tipo = (opcionTipo == 1) ? VENTA : COMPRA;
     
     printf("Ingrese la fecha (YYYY-MM-DD): ");
@@ -123,28 +172,21 @@ void menuCrearTransaccion(Inventario* inv) {
             scanf("%d", &cantidad);
             if (agregarItemTransaccion(trans, *prod, cantidad) == 0)
                 printf("\n \033[1;32mItem agregado exitosamente.\033[0m\n");
-                if (guardarInventario(inv) != 0) {
-            printf("\033[1;31mError al guardar el inventario en el fichero.\033[0m\n");
-        }
             else
                 printf("\n \033[1;31mError al agregar el item.\033[0m\n");
         }
         
-        printf("¿Desea agregar otro producto? (1: Sí, 0: No): ");
-        int resultado = scanf("%d", &continuar);
+        printf("¿Desea agregar otro producto? (1: Si, 0: No): ");
+        resultado = scanf("%d", &continuar);
         if (resultado != 1) {
-            while (getchar() != '\n'); 
+            while(getchar() != '\n'); 
             printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
             continue; 
         }
-        if (continuar < 1 || continuar > 2) {
-            printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
-            continue;
-        }
     }
-
+    
     calcularTotalTransaccion(trans);
-    if (guardarTransaccion(trans) == 0)
+    if (guardarTransaccionDB(db, trans) == 0)
         printf("\n \033[1;32mTransaccion guardada exitosamente.\033[0m\n");
     else
         printf("\n \033[1;31mError al guardar la transaccion.\033[0m\n");

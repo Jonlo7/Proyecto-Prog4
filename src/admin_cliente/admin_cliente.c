@@ -1,6 +1,7 @@
 #include "admin_cliente.h"
+#include "bbdd/sqlite/sqlite3.h"
 
-void menuAdminClient(void) {
+void menuAdminClientDB(sqlite3* db) {
     int opcion = 0;
     do {
         printf("\n\033[1;35m");
