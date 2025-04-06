@@ -7,12 +7,15 @@ Este proyecto es un sistema de gestión de inventarios diseñado para pequeñas 
 ## Tabla de Contenidos
 
 - [Características](#características)
+- [Estructura del Proyecto](#estructura-del-proyecto)
 - [Compilación y Ejecución](#compilación-y-ejecución)
 - [Uso de la Aplicación](#uso-de-la-aplicación)
   - [Login y Roles](#login-y-roles)
   - [Gestión de Inventario](#gestión-de-inventario)
   - [Gestión de Transacciones](#gestión-de-transacciones)
   - [Administración Avanzada](#administración-avanzada)
+- [Persistencia de Datos](#persistencia-de-datos)
+- [Autores](#autores)
 
 ---
 
@@ -32,6 +35,47 @@ Este proyecto es un sistema de gestión de inventarios diseñado para pequeñas 
 
 - **Interfaz de Línea de Comandos:**  
   Menús interactivos y decorados con colores para ofrecer una experiencia visualmente consistente y atractiva.
+
+---
+
+## Estructura del Proyecto
+
+La organización de archivos es la siguiente:
+
+```plaintext
+GestorInventario/ 
+├── bbdd/ 
+│ ├── db_init/ 
+│ │ ├── db_init.c # Inicialización y configuración de la base de datos
+│ │ └── db_init.h # Definición de funciones para la inicialización de la base de datos
+│ ├── sqlite/ 
+│ │ ├── shell.c # Código fuente de la interfaz de línea de comandos de SQLite
+│ │ ├── sqlite3.c # Código fuente de SQLite 
+│ │ ├── sqlite3.h # Definición de la API de SQLite
+│ │ └── sqlite3ext.h # Extensiones de SQLite
+├── src/ 
+│ ├── admin_cliente/ 
+│ │ ├── admin_cliente.c # Módulo stub para funcionalidades de administración avanzada 
+│ │ └── admin_cliente.h # Definición de funciones para el módulo de administración
+│ ├── colors/ 
+│ │ └── colors.h # Definición de macros de colores para la interfaz 
+│ ├── inventario/ 
+│ │ ├── inventario.c # Implementación de la lógica de inventario 
+│ │ └── inventario.h # Definición de funciones para el manejo del inventario
+│ ├── login/ 
+│ │ ├── login.c # Lógica de autenticación de usuarios 
+│ │ └── login.h # Definición de funciones para el manejo del login
+│ ├── transacciones/ 
+│ │ ├── transacciones.c # Implementación de la lógica de transacciones (ventas/compras) 
+│ │ └── transacciones.h # Definición de funciones para el manejo de transacciones
+│ ├── usuarios/ 
+│ │ ├── usuarios.c # Manejo de registro de usuarios y roles 
+│ │ └── usuarios.h # Definición de funciones para el manejo de usuarios
+│ └── main.c # Punto de entrada de la aplicación
+├── main.exe # Ejecutable generado tras la compilación (en Windows) 
+├── README.md # Documentación y guía de usuario 
+└── inventario.sqlite # Archivo de la base de datos SQLite
+```
 
 ---
 
@@ -74,12 +118,12 @@ Al ejecutar el programa se muestra un menú principal donde puedes:
 
 ---
 
-## Gestión de Inventario
+### Gestión de Inventario
 
 Dentro de los menús (tanto para administradores como para empleados) se pueden realizar las siguientes operaciones:
 
 - **Listar Productos:**  
-  Visualiza el inventario activo en una pantalla formateada con encabezados decorados y colores.
+  Visualiza el inventario en una pantalla formateada con encabezados decorados y colores, incluyendo si el producto está activo o inactivo.
 
 - **Agregar Producto:**  
   Mediante un menú interactivo se solicita al usuario:
@@ -101,7 +145,7 @@ Dentro de los menús (tanto para administradores como para empleados) se pueden 
 
 ---
 
-## Gestión de Transacciones
+### Gestión de Transacciones
 
 El sistema permite registrar transacciones que involucran uno o varios productos:
 
@@ -111,16 +155,13 @@ El sistema permite registrar transacciones que involucran uno o varios productos
   - El ID del producto (se busca en el inventario).
   - La cantidad a transaccionar.
 
+Solo se pueden agregar a la transacción productos que estén activos. Si se intenta agregar un producto inactivo, se muestra un mensaje de error.
 Cada ítem se procesa automáticamente (calculando el total del ítem como el producto del precio del producto y la cantidad).  
 Al finalizar, se calcula el total de la transacción y se guarda en el fichero de ventas.
 
 ---
 
-Aquí tienes un ejemplo actualizado para el apartado "Persistencia de Datos" en el README:
-
----
-
-**Persistencia de Datos**
+### Persistencia de Datos
 
 El sistema utiliza **SQLite** para mantener la persistencia de los datos, en lugar de utilizar ficheros de texto. La base de datos se crea (o actualiza) automáticamente al ejecutar la aplicación y se almacena en un único archivo (por ejemplo, `inventario.sqlite`). Las principales tablas de la base de datos son:
 
@@ -139,7 +180,7 @@ El sistema utiliza **SQLite** para mantener la persistencia de los datos, en lug
 
 ---
 
-## Administración Avanzada (se integrarán en fases posteriores)
+### Administración Avanzada (se integrarán en fases posteriores)
 
 El módulo de administración (admin_cliente) es un stub que muestra un menú interactivo con opciones como:
 
