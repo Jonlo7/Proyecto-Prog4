@@ -1,4 +1,3 @@
-```markdown
 # Gestor de Inventarios para Pequeños Negocios
 
 Un sistema de gestión de inventarios y transacciones pensado para tiendas pequeñas.  
@@ -9,17 +8,17 @@ Un sistema de gestión de inventarios y transacciones pensado para tiendas peque
 
 ## 📑 Contenido
 
-- [Características](#caracter%C3%ADsticas)  
-- [Estructura del Proyecto](#estructura-del-proyecto)  
-- [Compilación & Ejecución](#compilaci%C3%B3n--ejecuci%C3%B3n)  
-  - [Hito 2 (Monolítico)](#hito-2-monol%C3%ADtico)  
-  - [Hito 3 (Cliente-Servidor)](#hito-3-cliente-servidor)  
-- [Uso de la Aplicación](#uso-de-la-aplicaci%C3%B3n)  
-  - [Credenciales & Roles](#credenciales--roles)  
-  - [Menú Administrador (Hito 2)](#men%C3%BA-administrador-hito-2)  
-  - [Menú Cliente/Empleado (Hito 3)](#men%C3%BA-clienteempleado-hito-3)  
-- [Persistencia de Datos](#persistencia-de-datos)  
-- [Autores](#autores)  
+- [Características](#-características)  
+- [Estructura del proyecto](#-estructura-del-proyecto)  
+- [Compilación y ejecución](#-compilación-y-ejecución)  
+  - [Hito 2 (Monolítico)](#hito-2-monolítico)  
+  - [Hito 3 (Cliente-servidor)](#hito-3-cliente-servidor)  
+- [Uso de la aplicación](#-uso-de-la-aplicación)  
+  - [Credenciales y roles](#credenciales-y-roles)  
+  - [Menú administrador (Hito 2)](#menú-administrador-hito-2)  
+  - [Menú cliente/empleado (Hito 3)](#menú-clienteempleado-hito-3)  
+- [Persistencia de datos](#-persistencia-de-datos)  
+- [Autores](#-autores)
 
 ---
 
@@ -70,7 +69,7 @@ Un sistema de gestión de inventarios y transacciones pensado para tiendas peque
 
 ---
 
-## ⚙️ Compilación & Ejecución
+## ⚙️ Compilación y Ejecución
 
 ### Hito 2 (Monolítico)
 
@@ -113,7 +112,7 @@ gcc -g \
 
 ## 🚀 Uso de la Aplicación
 
-### Credenciales & Roles
+### Credenciales y Roles
 
 * **Administrador:**
   Tiene acceso a registrar usuarios, ver estadísticas y CRUD completo.
