@@ -1,7 +1,31 @@
-# Ignorar archivos específicos de IDE
-.vscode/
+# Binarios y objetos
+*.exe
+*.o
+*.obj
+*.dll
+*.lib
 
-# Ignorar archivos de compilación
+# Archivos generados por MinGW/Make
+sqlite3.o
+admin_net.o
+inventario.o
+main.o
+servidor.exe
+cliente.exe
 main.exe
-server.exe
-client.exe
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs y temporales
+*.log
+*.tmp
+*~
+
+# Archivos de coverity u otros análisis estático
+*.coverity

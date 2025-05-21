@@ -1,5 +1,6 @@
 // main.cpp
 #include "client_net/admin_net.h"
+#include "colors/colors.h"
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -260,154 +261,162 @@ void showLowStock(const std::vector<std::pair<int,int>>& v) {
     }
 }
 
+// Imprime el menú con colores
+void printMenu() {
+    // Titulo en cyan
+    std::cout << COLOR_CYAN;
+    std::cout << "====================================\n";
+    std::cout << "   MENU CLIENTE HITO 3\n";
+    std::cout << "====================================\n";
+    std::cout << COLOR_RESET;
+    // Opciones: numero en verde, texto en blanco
+    std::cout << COLOR_GREEN << " 1) " << COLOR_RESET << "Listar productos activos\n";
+    std::cout << COLOR_GREEN << " 2) " << COLOR_RESET << "Obtener producto\n";
+    std::cout << COLOR_GREEN << " 3) " << COLOR_RESET << "Agregar producto\n";
+    std::cout << COLOR_GREEN << " 4) " << COLOR_RESET << "Actualizar stock\n";
+    std::cout << COLOR_GREEN << " 5) " << COLOR_RESET << "Eliminar producto\n";
+    std::cout << COLOR_GREEN << " 6) " << COLOR_RESET << "Registrar venta\n";
+    std::cout << COLOR_GREEN << " 7) " << COLOR_RESET << "Listar transacciones\n";
+    std::cout << COLOR_GREEN << " 8) " << COLOR_RESET << "Estadisticas ventas\n";
+    std::cout << COLOR_GREEN << " 9) " << COLOR_RESET << "Listar low stock\n";
+    std::cout << COLOR_GREEN << " 0) " << COLOR_RESET << "Salir\n";
+    std::cout << "Opcion: ";
+}
+
 int main() {
     int opcion = -1;
     do {
-        std::cout << "\n--- MENU CLIENTE HITO 3 ---\n"
-                  << "1) Listar productos activos\n"
-                  << "2) Obtener producto\n"
-                  << "3) Agregar producto\n"
-                  << "4) Actualizar stock\n"
-                  << "5) Eliminar producto\n"
-                  << "6) Registrar venta\n"
-                  << "7) Listar transacciones\n"
-                  << "8) Estadisticas ventas\n"
-                  << "9) Listar low stock\n"
-                  << "0) Salir\n"
-                  << "Opcion: ";
-        std::cin >> opcion;
+        printMenu();
+        if(!(std::cin >> opcion)) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << COLOR_RED << "Entrada invalida\n" << COLOR_RESET;
+            continue;
+        }
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
         if (opcion == 0) break;
 
-        // Cada comando abre su propia conexión
         AdminNet net("127.0.0.1", 5000);
         if (!net.connectServer()) {
-            std::cerr << "No se pudo conectar al servidor\n";
+            std::cout << COLOR_RED << "✖ No se pudo conectar al servidor\n" << COLOR_RESET;
             continue;
         }
 
-        std::string cmd, resp;
         switch (opcion) {
             case 1: {
                 auto resp = net.sendCommand("LIST_PRODUCTS");
                 auto prods = parseProducts(resp);
                 if (prods.empty()) {
-                    std::cout << "No hay productos activos.\n";
+                    std::cout << COLOR_YELLOW << "— No hay productos activos\n" << COLOR_RESET;
                 } else {
                     showProducts(prods);
                 }
                 break;
             }
             case 2: {
-                int id;
-                std::cout << "ID: "; std::cin >> id;
-                cmd = "GET_PRODUCT|" + std::to_string(id);
-                resp = net.sendCommand(cmd);
+                int id; 
+                std::cout << COLOR_YELLOW << "ID: " << COLOR_RESET;
+                std::cin >> id;
+                auto resp = net.sendCommand("GET_PRODUCT|" + std::to_string(id));
                 if (resp.rfind("OK|PRODUCT|", 0) == 0) {
-                    // reutilizar parseProductList para formatear
-                    auto v = parseProductList("OK|PRODUCTOS|" + resp.substr(11));
-                    if (!v.empty()) showProducts(v);
+                    auto v = parseProducts("OK|PRODUCTOS|" + resp.substr(11));
+                    showProducts(v);
                 } else {
-                    std::cout << "Producto no encontrado\n";
+                    std::cout << COLOR_RED << "✖ Producto no encontrado\n" << COLOR_RESET;
                 }
                 break;
             }
-
             case 3: {
                 Producto p;
-                std::cout << "ID: "; std::cin >> p.id;
+                std::cout << COLOR_YELLOW << "ID: "      << COLOR_RESET; std::cin >> p.id;
                 std::cin.ignore();
-                std::cout << "Nombre: "; std::getline(std::cin, p.nombre);
-                std::cout << "Precio: "; std::cin >> p.precio;
-                std::cout << "Stock: ";  std::cin >> p.stock;
+                std::cout << COLOR_YELLOW << "Nombre: "  << COLOR_RESET; std::getline(std::cin, p.nombre);
+                std::cout << COLOR_YELLOW << "Precio: "  << COLOR_RESET; std::cin >> p.precio;
+                std::cout << COLOR_YELLOW << "Stock: "   << COLOR_RESET; std::cin >> p.stock;
                 std::ostringstream os;
                 os << "ADD_PRODUCT|" 
                    << p.id << "|" << p.nombre << "|" 
                    << p.precio << "|" << p.stock;
-                resp = net.sendCommand(os.str());
-                std::cout << (resp == "OK|ADD_PRODUCT" ? "Añadido\n" : "Error\n");
+                auto resp = net.sendCommand(os.str());
+                if (resp == "OK|ADD_PRODUCT")
+                    std::cout << COLOR_GREEN << "✔ Producto añadido\n" << COLOR_RESET;
+                else
+                    std::cout << COLOR_RED   << "✖ Error al añadir\n" << COLOR_RESET;
                 break;
             }
-
             case 4: {
                 int id, delta;
-                std::cout << "ID: "; std::cin >> id;
-                std::cout << "Delta stock: "; std::cin >> delta;
-                cmd = "UPDATE_STOCK|" + std::to_string(id) + "|" + std::to_string(delta);
-                resp = net.sendCommand(cmd);
-                std::cout << (resp == "OK|UPDATE_STOCK" ? "Actualizado\n" : "Error\n");
+                std::cout << COLOR_YELLOW << "ID: "          << COLOR_RESET; std::cin >> id;
+                std::cout << COLOR_YELLOW << "Delta stock: "<< COLOR_RESET; std::cin >> delta;
+                auto resp = net.sendCommand(
+                    "UPDATE_STOCK|" + std::to_string(id) + "|" + std::to_string(delta));
+                if (resp == "OK|UPDATE_STOCK")
+                    std::cout << COLOR_GREEN << "✔ Stock actualizado\n" << COLOR_RESET;
+                else
+                    std::cout << COLOR_RED   << "✖ Error al actualizar\n" << COLOR_RESET;
                 break;
             }
-
             case 5: {
                 int id;
-                std::cout << "ID: "; std::cin >> id;
-                cmd = "DELETE_PRODUCT|" + std::to_string(id);
-                resp = net.sendCommand(cmd);
-                std::cout << (resp == "OK|DELETE_PRODUCT" ? "Eliminado\n" : "Error\n");
+                std::cout << COLOR_YELLOW << "ID: " << COLOR_RESET; std::cin >> id;
+                auto resp = net.sendCommand("DELETE_PRODUCT|" + std::to_string(id));
+                if (resp == "OK|DELETE_PRODUCT")
+                    std::cout << COLOR_GREEN << "✔ Producto eliminado\n" << COLOR_RESET;
+                else
+                    std::cout << COLOR_RED   << "✖ Error al eliminar\n" << COLOR_RESET;
                 break;
             }
-
             case 6: {
-                int id, qty;
-                std::string date;
-                std::cout << "ID producto: "; std::cin >> id;
-                std::cout << "Cantidad: ";   std::cin >> qty;
+                int id, qty; std::string date;
+                std::cout << COLOR_YELLOW << "ID producto: " << COLOR_RESET; std::cin >> id;
+                std::cout << COLOR_YELLOW << "Cantidad: "     << COLOR_RESET; std::cin >> qty;
                 std::cin.ignore();
-                std::cout << "Fecha (YYYY-MM-DD): "; std::getline(std::cin, date);
+                std::cout << COLOR_YELLOW << "Fecha (YYYY-MM-DD): " << COLOR_RESET;
+                std::getline(std::cin, date);
                 std::ostringstream os;
-                os << "RECORD_SALE|" 
-                   << id << "|" << qty << "|" << date;
-                resp = net.sendCommand(os.str());
-                std::cout << (resp == "OK|RECORD_SALE" ? "Venta registrada\n" : "Error\n");
+                os << "RECORD_SALE|" << id << "|" << qty << "|" << date;
+                auto resp = net.sendCommand(os.str());
+                if (resp == "OK|RECORD_SALE")
+                    std::cout << COLOR_GREEN << "✔ Venta registrada\n" << COLOR_RESET;
+                else
+                    std::cout << COLOR_RED   << "✖ Error al registrar\n" << COLOR_RESET;
                 break;
             }
-
             case 7: {
                 auto resp = net.sendCommand("LIST_TRANSACTIONS");
                 auto trs  = parseTrans(resp);
-                if (trs.empty()) {
-                    std::cout << "No hay transacciones registradas.\n";
-                } else {
+                if (trs.empty())
+                    std::cout << COLOR_YELLOW << "— No hay transacciones\n" << COLOR_RESET;
+                else
                     showTransactions(trs);
-                }
                 break;
             }
-
             case 8: {
                 std::string start, end;
-                std::cout << "Fecha inicio: "; std::getline(std::cin, start);
-                std::cout << "Fecha fin   : "; std::getline(std::cin, end);
-                std::string cmd = "GET_STATS_SALES|" + start + "|" + end;
-                auto resp = net.sendCommand(cmd);
-                // resp == "OK|STATS_SALES|TotalVentas:5;Ingresos:350;PromedioPorVenta:70"
-                Stats st = parseStats(resp);
+                std::cout << COLOR_YELLOW << "Fecha inicio: " << COLOR_RESET; std::getline(std::cin, start);
+                std::cout << COLOR_YELLOW << "Fecha fin   : " << COLOR_RESET; std::getline(std::cin, end);
+                auto resp = net.sendCommand("GET_STATS_SALES|" + start + "|" + end);
+                auto st   = parseStats(resp);
                 showStatsCentered(st);
                 break;
             }
-
             case 9: {
                 int umbral;
-                std::cout << "Umbral stock: "; 
+                std::cout << COLOR_YELLOW << "Umbral stock: " << COLOR_RESET;
                 std::cin >> umbral;
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-                std::string cmd = "LIST_LOW_STOCK|" + std::to_string(umbral);
-                std::string resp = net.sendCommand(cmd);
+                auto resp = net.sendCommand("LIST_LOW_STOCK|" + std::to_string(umbral));
                 auto lows = parseLowStock(resp);
                 showLowStock(lows);
                 break;
             }
-
             default:
-                std::cout << "Opción inválida\n";
+                std::cout << COLOR_RED << "✖ Opcióo invalida\n" << COLOR_RESET;
         }
 
         net.closeConn();
-
     } while (true);
 
-    std::cout << "Saliendo...\n";
+    std::cout << COLOR_MAGENTA << "\n¡Hasta luego!\n" << COLOR_RESET;
     return 0;
 }

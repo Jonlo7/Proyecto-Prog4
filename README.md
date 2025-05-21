@@ -1,166 +1,184 @@
+```markdown
 # Gestor de Inventarios para Pequeños Negocios
 
-Este proyecto es un sistema de gestión de inventarios diseñado para pequeñas tiendas. Permite registrar y administrar productos, gestionar transacciones (ventas y compras) y controlar el acceso mediante un sistema de usuarios con roles (administrador y empleado).
+Un sistema de gestión de inventarios y transacciones pensado para tiendas pequeñas.  
+**Hito 2** está basado en una aplicación monolítica de consola con ficheros;  
+**Hito 3** introduce un modelo cliente-servidor usando SQLite y sockets TCP.
 
 ---
 
-## Tabla de Contenidos
+## 📑 Contenido
 
-- [Características](#características)
-- [Compilación y Ejecución](#compilación-y-ejecución)
-- [Uso de la Aplicación](#uso-de-la-aplicación)
-  - [Login y Roles](#login-y-roles)
-  - [Gestión de Inventario](#gestión-de-inventario)
-  - [Gestión de Transacciones](#gestión-de-transacciones)
-  - [Administración Avanzada](#administración-avanzada)
-
----
-
-## Características
-
-- **Gestión de Inventario Dinámico:**  
-  Permite cargar, visualizar, agregar, modificar y actualizar el stock de productos utilizando memoria dinámica y persistencia en fichero.
-
-- **Gestión de Transacciones:**  
-  Registra transacciones de ventas y compras, permitiendo incluir múltiples productos en cada operación. Los datos se guardan en un fichero para mantener la persistencia.
-
-- **Sistema de Usuarios y Login:**  
-  Implementa el registro y autenticación de usuarios. Los roles (administrador y empleado) determinan las funcionalidades disponibles.
-
-- **Módulo de Administración:**  
-  Un stub para funcionalidades avanzadas (informes, estadísticas, etc.) que se integrará en futuras fases.
-
-- **Interfaz de Línea de Comandos:**  
-  Menús interactivos y decorados con colores para ofrecer una experiencia visualmente consistente y atractiva.
+- [Características](#caracter%C3%ADsticas)  
+- [Estructura del Proyecto](#estructura-del-proyecto)  
+- [Compilación & Ejecución](#compilaci%C3%B3n--ejecuci%C3%B3n)  
+  - [Hito 2 (Monolítico)](#hito-2-monol%C3%ADtico)  
+  - [Hito 3 (Cliente-Servidor)](#hito-3-cliente-servidor)  
+- [Uso de la Aplicación](#uso-de-la-aplicaci%C3%B3n)  
+  - [Credenciales & Roles](#credenciales--roles)  
+  - [Menú Administrador (Hito 2)](#men%C3%BA-administrador-hito-2)  
+  - [Menú Cliente/Empleado (Hito 3)](#men%C3%BA-clienteempleado-hito-3)  
+- [Persistencia de Datos](#persistencia-de-datos)  
+- [Autores](#autores)  
 
 ---
 
-## Compilación y Ejecución
+## 🛠 Características
 
-### Configuración en VSCode
+- **Hito 2 (Monolítico):**  
+  - Gestión de inventario en memoria dinámica + ficheros de texto.  
+  - Usuarios con roles y login en consola.  
+  - Transacciones (ventas/compras) multi-ítem.
 
-El proyecto se puede compilar y depurar utilizando los archivos de configuración:
+- **Hito 3 (Cliente-Servidor):**  
+  - API TCP: comandos como `LIST_PRODUCTS`, `RECORD_SALE`, etc.  
+  - Servidor en C++ con SQLite (amalgama compilada como objeto).  
+  - Cliente C++ con menús formateados y colores.  
+  - Persistencia y consultas SQL: productos activos, ventas, estadísticas, low-stock.
 
-- **launch.json**  
-  Configura la depuración (por ejemplo, define el ejecutable, la ruta del depurador y la tarea previa de compilación).
+- **UI de Consola Mejorada:**  
+  - Tablas con encabezados alineados.  
+  - Colores configurable en `src/colors/colors.h`.  
+  - Menús centrados y decorados.
 
-- **tasks.json**  
-  Define la tarea de compilación con GCC para generar el ejecutable a partir de los archivos fuente.
+---
 
-- **settings.json**  
-  Establece las asociaciones de archivos y otros ajustes del entorno para trabajar con C en VSCode.
+## 📂 Estructura del Proyecto
 
-### Compilación Manual
-
-Si deseas compilar desde la terminal, puedes usar un comando similar a:
-
-```bash
- gcc -g -I. -I./bbdd -I./src src/main.c src/admin_cliente/admin_cliente.c src/inventario/inventario.c src/login/login.c src/transacciones/transacciones.c src/usuarios/usuarios.c bbdd/db_init/db_init.c bbdd/sqlite/sqlite3.c -o main.exe
 ```
 
-### Ejecución Manual
+/
+├─ bbdd/
+│   ├─ sqlite/            ← SQLite amalgamada
+│   └─ db\_init/           ← Creación de tablas (Hito 2)
+├─ src/
+│   ├─ admin\_cliente/     ← Stub administrador (Hito 2)
+│   ├─ client\_net/        ← Cliente TCP (Hito 3)
+│   ├─ colors/            ← Definiciones ANSI para colores
+│   ├─ inventario/        ← Módulo inventario (Hito 2)
+│   ├─ login/             ← Módulo login (Hito 2)
+│   ├─ server/            ← Servidor TCP + DBHandler (Hito 3)
+│   ├─ transacciones/     ← Módulo transacciones (Hito 2)
+│   ├─ usuarios/          ← Módulo usuarios (Hito 2)
+│   ├─ main.c             ← Entrada Hito 2 (monolítico)
+│   └─ main.cpp           ← Entrada Hito 3 (cliente TCP)
+├─ Makefile               ← Reglas para Hito 2 y Hito 3
+├─ .gitignore
+└─ README.md
+
+````
+
+---
+
+## ⚙️ Compilación & Ejecución
+
+### Hito 2 (Monolítico)
 
 ```bash
-.\main.exe
+make legacy
+./main.exe
+````
+
+O compilación manual:
+
+```bash
+gcc -g \
+  -I. -I./bbdd -I./src \
+  src/main.c src/admin_cliente/admin_cliente.c \
+  src/inventario/inventario.c src/login/login.c \
+  src/transacciones/transacciones.c src/usuarios/usuarios.c \
+  bbdd/db_init/db_init.c bbdd/sqlite/sqlite3.c \
+  -o main.exe
 ```
 
----
+### Hito 3 (Cliente-Servidor)
 
-## Uso de la Aplicación
+1. **Compila todo**
 
-### Login y Roles
+   ```bash
+   make
+   ```
+2. **Arranca servidor**
 
-#### Pantalla de Inicio
+   ```bash
+   ./servidor.exe inventario.sqlite 5000
+   ```
+3. **En otra consola, lanza el cliente**
 
-Al ejecutar el programa se muestra un menú principal donde puedes:
-
-- Iniciar sesión (Login).
-- Registrar un nuevo usuario.
-- Salir de la aplicación.
-
-#### Proceso de Login
-
-- Se solicitarán las credenciales (nombre de usuario y contraseña) en un menú decorado.
-- Si la autenticación es exitosa:
-  - **Administrador:** Accede a un menú con opciones avanzadas, que incluyen la gestión completa del inventario, transacciones, y la posibilidad de registrar nuevos usuarios.
-  - **Empleado:** Accede a un menú con opciones básicas, como listar productos, actualizar stock y crear transacciones.
+   ```bash
+   ./cliente.exe
+   ```
 
 ---
 
-## Gestión de Inventario
+## 🚀 Uso de la Aplicación
 
-Dentro de los menús (tanto para administradores como para empleados) se pueden realizar las siguientes operaciones:
+### Credenciales & Roles
 
-- **Listar Productos:**  
-  Visualiza el inventario activo en una pantalla formateada con encabezados decorados y colores.
+* **Administrador:**
+  Tiene acceso a registrar usuarios, ver estadísticas y CRUD completo.
 
-- **Agregar Producto:**  
-  Mediante un menú interactivo se solicita al usuario:
-  - Nombre del producto.
-  - Precio.
-  - Stock inicial.
-  - Estado (activo/inactivo).
+* **Empleado:**
+  Solo lista productos, actualiza stock y registra ventas.
 
-- **Actualizar Stock:**  
-  Permite incrementar o decrementar el stock de un producto ingresando el ID del producto y la cantidad  
-  (positivo para sumar, negativo para restar).
-
-- **Modificar Producto:**  
-  Ofrece un submenú donde se pueden modificar los atributos de un producto:
-  - Cambiar precio.
-  - Cambiar stock.
-  - Cambiar nombre.
-  - Marcar como inactivo (baja).
+Las credenciales se almacenan en la tabla `usuarios` de SQLite.
 
 ---
 
-## Gestión de Transacciones
+### Menú Administrador (Hito 2)
 
-El sistema permite registrar transacciones que involucran uno o varios productos:
+```text
++-------------------------------+
+|    SISTEMA GESTOR INVENTARIO  |
++-------------------------------+
+| 1. Listar productos           |
+| 2. Agregar/modificar producto |
+| 3. Eliminar producto          |
+| 4. Crear transaccion          |
+| 5. Registrar usuario          |
+| 6. Salir                      |
++-------------------------------+
+```
 
-- **Crear Transacción:**  
-  El usuario selecciona el tipo de transacción (Venta o Compra), ingresa la fecha y, a través de un menú interactivo, agrega uno o más ítems.  
-  Para cada ítem, se solicita:
-  - El ID del producto (se busca en el inventario).
-  - La cantidad a transaccionar.
-
-Cada ítem se procesa automáticamente (calculando el total del ítem como el producto del precio del producto y la cantidad).  
-Al finalizar, se calcula el total de la transacción y se guarda en el fichero de ventas.
-
----
-
-Aquí tienes un ejemplo actualizado para el apartado "Persistencia de Datos" en el README:
-
----
-
-**Persistencia de Datos**
-
-El sistema utiliza **SQLite** para mantener la persistencia de los datos, en lugar de utilizar ficheros de texto. La base de datos se crea (o actualiza) automáticamente al ejecutar la aplicación y se almacena en un único archivo (por ejemplo, `inventario.sqlite`). Las principales tablas de la base de datos son:
-
-- **productos:**  
-  Contiene la lista de productos, con campos para el identificador, nombre, precio, stock y estado (activo/inactivo).
-
-- **transacciones:**  
-  Registra las transacciones realizadas (ventas o compras), incluyendo el tipo, la fecha y el total de la transacción.
-
-- **items_transaccion:**  
-  Almacena los ítems asociados a cada transacción, indicando el producto, la cantidad, el precio unitario y el total por ítem.  
-  (Esta tabla se relaciona con la tabla de transacciones a través de una clave foránea).
-
-- **usuarios:**  
-  Guarda los datos de los usuarios registrados, incluyendo el nombre de usuario, la contraseña y el rol (administrador o empleado).
+Opciones basadas en ficheros de texto y módulos en C.
 
 ---
 
-## Administración Avanzada (se integrarán en fases posteriores)
+### Menú Cliente/Empleado (Hito 3)
 
-El módulo de administración (admin_cliente) es un stub que muestra un menú interactivo con opciones como:
+```text
+--- MENU CLIENTE HITO 3 ---
+ 1) Listar productos activos
+ 2) Obtener producto
+ 3) Agregar producto
+ 4) Actualizar stock
+ 5) Eliminar producto
+ 6) Registrar venta
+ 7) Listar transacciones
+ 8) Estadisticas ventas
+ 9) Listar low stock
+ 0) Salir
+```
 
-- Mostrar informes.
-- Consultar estadísticas.
-- Otras opciones futuras.
+Cada selección abre su propia conexión TCP, envía un comando y muestra la respuesta en tablas formateadas y colores.
 
-## Autores
+---
 
-- Jon López Carrillo
-- Roberto Fernandez Barrios
+## 💾 Persistencia de Datos
+
+Usamos un único fichero SQLite (`inventario.sqlite`) con estas tablas:
+
+* **productos:** `id, nombre, precio, stock, activo`
+* **usuarios:**  `id, usuario, contrasena, rol`
+* **transacciones:** `id, tipo, fecha, total`
+* **items\_transaccion:**
+  `id, transaccion_id → transacciones.id, producto_id → productos.id, cantidad, precio_unitario, total_item`
+
+La base de datos se crea/actualiza al iniciar el servidor.
+
+---
+
+## 🖋 Autores
+
+* Jon López Carrillo
+* Roberto Fernández Barrios
