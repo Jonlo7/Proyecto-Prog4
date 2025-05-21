@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include "colors/colors.h"
 #include "inventario/inventario.h"
-#include "bbdd/sqlite/sqlite3.h"
+#include <sqlite3.h>
 
 #define MAX_FECHA 11 //YYYY-MM-DD
 

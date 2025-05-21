@@ -2,7 +2,8 @@
 #include <string.h>
 #include "login/login.h"
 #include "usuarios/usuarios.h"
-#include "bbdd/sqlite/sqlite3.h"
+#include <sqlite3.h>
+
 
 Usuario* realizarLoginDB(RegistroUsuarios* reg, sqlite3* db) {
     char usuario[MAX_USUARIO + 1];

@@ -1,5 +1,5 @@
 #include "usuarios/usuarios.h"
-#include "bbdd/sqlite/sqlite3.h"  // Asegúrate de que la ruta sea correcta
+#include <sqlite3.h>
 
 RegistroUsuarios* crearRegistroUsuarios(void) {
     RegistroUsuarios* reg = malloc(sizeof(RegistroUsuarios));

@@ -3,8 +3,8 @@
 #include "transacciones/transacciones.h"
 #include "login/login.h"
 #include "colors/colors.h"
-#include "bbdd/sqlite/sqlite3.h"
-#include "bbdd/db_init/db_init.h"
+#include <sqlite3.h>
+#include "db_init/db_init.h"
 
 // Menú de administrador usando funciones basadas en la BD
 void menuAdminDB(RegistroUsuarios* reg, Inventario* inv, sqlite3* db) {

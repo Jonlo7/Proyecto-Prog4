@@ -1,5 +1,5 @@
 #include "inventario/inventario.h"
-#include "bbdd/sqlite/sqlite3.h"
+#include <sqlite3.h>
 
 Inventario* crearInventario(void) {
     Inventario* inv = malloc(sizeof(Inventario));

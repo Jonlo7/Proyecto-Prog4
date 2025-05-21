@@ -1,5 +1,5 @@
 #include "admin_cliente/admin_cliente.h"
-#include "bbdd/sqlite/sqlite3.h"
+#include <sqlite3.h>
 
 void menuAdminClientDB(sqlite3* db) {
     int opcion = 0;

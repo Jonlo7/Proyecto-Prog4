@@ -1,7 +1,7 @@
 #ifndef DB_INIT_H
 #define DB_INIT_H
 
-#include "bbdd/sqlite/sqlite3.h"
+#include <sqlite3.h>
 
 /**
  * Inicializa la base de datos, creando las tablas necesarias y configurando las opciones.
