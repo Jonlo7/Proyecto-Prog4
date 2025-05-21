@@ -154,17 +154,14 @@ std::string Server::handleCommand(const std::string& cmd) {
         std::getline(ss, date,  '|');
         return db_.recordSale(id, qty, date) ? "OK|RECORD_SALE" : "ERROR|RECORD_SALE";
     }
-    else if (action == "LIST_SALES") {
-        std::string start, end;
-        std::getline(ss, start, '|');
-        std::getline(ss, end,   '|');
-        auto sales = db_.listSales(start, end);
+    else if (action == "LIST_TRANSACTIONS") {
+        auto trs = db_.listTransactions(); // Implementa este método en tu DBHandler
         std::ostringstream out;
-        out << "OK|SALES|";
-        for (size_t i = 0; i < sales.size(); ++i) {
-            const auto& s = sales[i];
-            out << s.product_id << ":" << s.quantity << ":" << s.date;
-            if (i + 1 < sales.size()) out << ";";
+        out << "OK|TRANSACTIONS|";
+        for (size_t i = 0; i < trs.size(); ++i) {
+            const auto& t = trs[i];
+            out << t.id << ":" << t.tipo << ":" << t.fecha << ":" << t.total;
+            if (i+1 < trs.size()) out << ";";
         }
         return out.str();
     }

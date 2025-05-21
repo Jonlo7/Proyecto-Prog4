@@ -210,28 +210,25 @@ bool DBHandler::recordSale(int producto_id, int cantidad, const std::string& fec
     return true;
 }
 
-// Lista ventas entre dos fechas (formato YYYY-MM-DD)
-std::vector<Sale> DBHandler::listSales(const std::string& start, const std::string& end) {
+// Lista transacciones entre dos fechas (formato YYYY-MM-DD)
+std::vector<Transaccion> DBHandler::listTransactions() {
     const char* sql =
-        "SELECT it.producto_id, it.cantidad, t.fecha "
-        "FROM items_transaccion it "
-        "JOIN transacciones t ON it.transaccion_id = t.id "
-        "WHERE t.fecha BETWEEN ? AND ?;";
+      "SELECT id, tipo, fecha, total FROM transacciones;";
     sqlite3_stmt* stmt = nullptr;
-    std::vector<Sale> res;
+    std::vector<Transaccion> res;
     if (sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        sqlite3_finalize(stmt);
-        return res;
+      sqlite3_finalize(stmt);
+      return res;
     }
-    sqlite3_bind_text(stmt, 1, start.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 2, end.c_str(),   -1, SQLITE_TRANSIENT);
-
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        Sale s;
-        s.product_id = sqlite3_column_int(stmt, 0);
-        s.quantity   = sqlite3_column_int(stmt, 1);
-        s.date       = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
-        res.push_back(s);
+      Transaccion t;
+      t.id    = sqlite3_column_int   (stmt, 0);
+      t.tipo  = reinterpret_cast<const char*>(
+                  sqlite3_column_text(stmt, 1));
+      t.fecha = reinterpret_cast<const char*>(
+                  sqlite3_column_text(stmt, 2));
+      t.total = sqlite3_column_double(stmt, 3);
+      res.push_back(t);
     }
     sqlite3_finalize(stmt);
     return res;
@@ -243,13 +240,16 @@ SalesStats DBHandler::getSalesStats(const std::string& start, const std::string&
         "SELECT COUNT(it.id), SUM(it.total_item), AVG(it.total_item) "
         "FROM items_transaccion it "
         "JOIN transacciones t ON it.transaccion_id = t.id "
-        "WHERE t.fecha BETWEEN ? AND ?;";
+        "WHERE UPPER(t.tipo) = 'VENTA' "
+        "  AND t.fecha BETWEEN ? AND ?;";
     sqlite3_stmt* stmt = nullptr;
     SalesStats st{0,0.0,0.0};
+
     if (sqlite3_prepare_v2(db_, sql, -1, &stmt, nullptr) != SQLITE_OK) {
         sqlite3_finalize(stmt);
         return st;
     }
+
     sqlite3_bind_text(stmt, 1, start.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, 2, end.c_str(),   -1, SQLITE_TRANSIENT);
 
@@ -258,6 +258,7 @@ SalesStats DBHandler::getSalesStats(const std::string& start, const std::string&
         st.totalRevenue = sqlite3_column_double(stmt, 1);
         st.avgPerSale   = sqlite3_column_double(stmt, 2);
     }
+
     sqlite3_finalize(stmt);
     return st;
 }

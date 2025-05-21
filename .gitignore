@@ -3,3 +3,5 @@
 
 # Ignorar archivos de compilación
 main.exe
+server.exe
+client.exe

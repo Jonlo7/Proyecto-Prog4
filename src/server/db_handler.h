@@ -18,10 +18,11 @@ struct Producto {
 };
 
 // Estructura para una venta individual
-struct Sale {
-    int         product_id;
-    int         quantity;
-    std::string date;       // "YYYY-MM-DD"
+struct Transaccion {
+    int          id;
+    std::string  tipo;
+    std::string  fecha;
+    double       total;
 };
 
 // Estructura con estadísticas de ventas
@@ -50,7 +51,7 @@ public:
 
     // Ventas
     bool                              recordSale(int productId, int qty, const std::string& date);
-    std::vector<Sale>                 listSales(const std::string& start, const std::string& end);
+    std::vector<Transaccion>          listTransactions();
     SalesStats                        getSalesStats(const std::string& start, const std::string& end);
 
 private:
