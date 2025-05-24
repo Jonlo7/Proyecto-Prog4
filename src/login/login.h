@@ -5,6 +5,7 @@
 #include "colors/colors.h"
 #include <sqlite3.h>
 
+
 /**
  * Realiza el proceso de login solicitando usuario y contraseña utilizando la base de datos.
  * @param reg Puntero al registro de usuarios.
@@ -20,4 +21,4 @@ Usuario* realizarLoginDB(RegistroUsuarios* reg, sqlite3* db);
  */
 void menuLoginDB(RegistroUsuarios* reg, sqlite3* db);
 
-#endif 
+#endif /* LOGIN_H */

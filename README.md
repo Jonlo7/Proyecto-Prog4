@@ -48,11 +48,11 @@ Un sistema de gestión de inventarios y transacciones pensado para tiendas peque
 
 /
 ├─ bbdd/
-│   ├─ sqlite/            ← SQLite
-│   └─ db\_init/          ← Creación de tablas (Hito 2)
+│   ├─ sqlite/            ← SQLite amalgamada
+│   └─ db\_init/           ← Creación de tablas (Hito 2)
 ├─ src/
-│   ├─ admin\_cliente/    ← Stub administrador (Hito 2)
-│   ├─ client\_net/       ← Cliente TCP (Hito 3)
+│   ├─ admin\_cliente/     ← Stub administrador (Hito 2)
+│   ├─ client\_net/        ← Cliente TCP (Hito 3)
 │   ├─ colors/            ← Definiciones ANSI para colores
 │   ├─ inventario/        ← Módulo inventario (Hito 2)
 │   ├─ login/             ← Módulo login (Hito 2)
@@ -71,7 +71,7 @@ Un sistema de gestión de inventarios y transacciones pensado para tiendas peque
 
 ## ⚙️ Compilación y Ejecución
 
-### Hito 2
+### Hito 2 (Monolítico)
 
 ```bash
 make legacy

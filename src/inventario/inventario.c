@@ -220,6 +220,8 @@ void listarProductosDB(sqlite3* db) {
     sqlite3_finalize(stmt);
 }
 
+/*       MENUS       */
+
 /**
  * Menú interactivo para agregar un nuevo producto utilizando la base de datos.
  * @param db Puntero a la base de datos.
@@ -283,6 +285,7 @@ void menuModificarProductoDB(sqlite3* db) {
     printf("Ingrese el ID del producto a modificar: ");
     scanf("%d", &id);
     
+    // Se carga el inventario en memoria para editar el producto
     Inventario* inv = crearInventario();
     if(cargarInventarioDB(inv, db) != 0) {
         printf("\n \033[1;31mError cargando inventario.\033[0m\n");
@@ -356,6 +359,7 @@ void menuModificarProductoDB(sqlite3* db) {
          }
     } while(opcion != 5);
     
+    // Actualizar la base de datos con los cambios realizados
     if (modificarProductoDB(db, prod->id, prod->nombre, prod->precio, prod->stock, prod->activo) == 0)
         printf("\n \033[1;32mProducto actualizado en la BD exitosamente.\033[0m\n");
     else

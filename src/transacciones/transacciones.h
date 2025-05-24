@@ -9,7 +9,7 @@
 #include "inventario/inventario.h"
 #include <sqlite3.h>
 
-#define MAX_FECHA 11
+#define MAX_FECHA 11 //YYYY-MM-DD
 
 typedef enum {VENTA, COMPRA} tipoTransaccion;
 
@@ -70,4 +70,4 @@ int guardarTransaccionDB(sqlite3* db, const Transaccion* trans);
  */
 void menuCrearTransaccionDB(Inventario* inv, sqlite3* db);
 
-#endif
+#endif /* TRANSACCIONES_H */

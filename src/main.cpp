@@ -1,3 +1,4 @@
+// main.cpp
 #include "client_net/admin_net.h"
 #include "colors/colors.h"
 #include <iostream>
@@ -7,6 +8,7 @@
 #include <limits> 
 #include <iomanip>
 
+// Estructura para mostrar productos
 struct Producto {
     int    id;
     std::string nombre;
@@ -14,6 +16,7 @@ struct Producto {
     int    stock;
 };
 
+// Estructura para una transacción
 struct Transaccion {
     int          id;
     std::string  tipo;
@@ -21,12 +24,14 @@ struct Transaccion {
     double       total;
 };
 
+// Estructura para estadísticas
 struct Stats {
     int     totalVentas;
     double  ingresos;
     double  promedio;
 };
 
+// Función auxiliar para centrar un texto en un campo de ancho `width`
 std::string center(const std::string& s, int width) {
     int pad = width - (int)s.size();
     if (pad <= 0) return s;
@@ -35,6 +40,7 @@ std::string center(const std::string& s, int width) {
     return std::string(padL, ' ') + s + std::string(padR, ' ');
 }
 
+// Parsea  "OK|PRODUCTOS|id:nombre:precio:stock;..."
 std::vector<Producto> parseProducts(const std::string& resp) {
     std::vector<Producto> lista;
     // saltar hasta el segundo '|'
@@ -66,6 +72,7 @@ std::vector<Producto> parseProducts(const std::string& resp) {
     return lista;
 }
 
+// Parsea la respuesta "OK|PRODUCTOS|id:nombre:precio:stock;..." a vector<Producto>
 std::vector<Producto> parseProductList(const std::string& resp) {
     std::vector<Producto> lista;
     auto pos = resp.find("OK|PRODUCTOS|");
@@ -86,8 +93,10 @@ std::vector<Producto> parseProductList(const std::string& resp) {
     return lista;
 }
 
+// Parsea "OK|TRANSACTIONS|id:tipo:fecha:total;…"
 std::vector<Transaccion> parseTrans(const std::string& resp) {
     std::vector<Transaccion> lista;
+    // Saltar prefijo antes del segundo '|'
     size_t p1 = resp.find('|');
     if (p1 == std::string::npos) return lista;
     size_t p2 = resp.find('|', p1 + 1);
@@ -100,10 +109,14 @@ std::vector<Transaccion> parseTrans(const std::string& resp) {
         std::istringstream is(item);
         std::string tok;
         Transaccion t;
+        // id
         if (!std::getline(is, tok, ':')) continue;
         try { t.id = std::stoi(tok); } catch(...) { continue; }
+        // tipo
         if (!std::getline(is, t.tipo, ':')) continue;
+        // fecha
         if (!std::getline(is, t.fecha, ':')) continue;
+        // total
         if (!std::getline(is, tok)) continue;
         try { t.total = std::stod(tok); } catch(...) { t.total = 0; }
         lista.push_back(t);
@@ -111,8 +124,10 @@ std::vector<Transaccion> parseTrans(const std::string& resp) {
     return lista;
 }
 
+// Parser de la respuesta de estadísticas
 Stats parseStats(const std::string& resp) {
     Stats st{0, 0.0, 0.0};
+    // Buscamos la parte después del segundo '|'
     auto p1 = resp.find('|');
     if (p1 == std::string::npos) return st;
     auto p2 = resp.find('|', p1 + 1);
@@ -137,6 +152,7 @@ Stats parseStats(const std::string& resp) {
     return st;
 }
 
+// Parsea la respuesta "OK|LOW_STOCK|id:stock;id:stock;..." a vector de pares
 std::vector<std::pair<int,int>> parseLowStock(const std::string& resp) {
     std::vector<std::pair<int,int>> lista;
     auto pos = resp.find("OK|LOW_STOCK|");
@@ -154,7 +170,9 @@ std::vector<std::pair<int,int>> parseLowStock(const std::string& resp) {
     return lista;
 }
 
+// Muestra los productos en tabla
 void showProducts(const std::vector<Producto>& v) {
+    // Cabecera
     std::cout << std::right 
               << std::setw(4) << "ID" 
               << "  " << std::left  << std::setw(15) << "Nombre" 
@@ -169,16 +187,21 @@ void showProducts(const std::vector<Producto>& v) {
 
     for (auto& p : v) {
         std::cout 
+            // ID a la derecha en 4 espacios
             << std::right << std::setw(4) << p.id 
             << "  "
+            // Nombre a la izquierda en 15 espacios
             << std::left  << std::setw(15) << p.nombre 
+            // Precio y stock a la derecha
             << std::right << std::setw(8) << p.precio 
             << std::setw(8) << p.stock 
             << "\n";
     }
 }
 
+// Muestra las transacciones en tabla
 void showTransactions(const std::vector<Transaccion>& v) {
+    // Cabecera
     std::cout 
       << std::right << std::setw(6)  << "ID"
       << "  "
@@ -190,6 +213,7 @@ void showTransactions(const std::vector<Transaccion>& v) {
     std::cout 
       << "------  ----------  ---------------  ----------\n";
 
+    // Filas
     for (auto& t : v) {
         std::cout
           << std::right << std::setw(6)  << t.id
@@ -201,21 +225,25 @@ void showTransactions(const std::vector<Transaccion>& v) {
     }
 }
 
+// Muestra las estadísticas de ventas
 void showStatsCentered(const Stats& s) {
-    const int W = 20; 
+    const int W = 20;  // ancho de cada columna
 
+    // Encabezados centrados
     std::cout
       << center("Total Ventas",    W)
       << center("Ingresos",         W)
       << center("Promedio/Venta",   W)
       << "\n";
 
+    // Línea separadora
     std::cout
       << std::string(W, '-') 
       << std::string(W, '-') 
       << std::string(W, '-') 
       << "\n";
 
+    // Valores convertidos a string y centrados
     std::cout
       << center(std::to_string(s.totalVentas), W)
       << center(std::to_string((int)s.ingresos), W)
@@ -223,6 +251,7 @@ void showStatsCentered(const Stats& s) {
       << "\n";
 }
 
+// Muestra la tabla de low stock
 void showLowStock(const std::vector<std::pair<int,int>>& v) {
     std::cout << "\nID\tStock\n";
     std::cout << "--------------\n";
@@ -232,12 +261,15 @@ void showLowStock(const std::vector<std::pair<int,int>>& v) {
     }
 }
 
+// Imprime el menú con colores
 void printMenu() {
+    // Titulo en cyan
     std::cout << COLOR_CYAN;
     std::cout << "====================================\n";
     std::cout << "   MENU CLIENTE HITO 3\n";
     std::cout << "====================================\n";
     std::cout << COLOR_RESET;
+    // Opciones: numero en verde, texto en blanco
     std::cout << COLOR_GREEN << " 1) " << COLOR_RESET << "Listar productos activos\n";
     std::cout << COLOR_GREEN << " 2) " << COLOR_RESET << "Obtener producto\n";
     std::cout << COLOR_GREEN << " 3) " << COLOR_RESET << "Agregar producto\n";

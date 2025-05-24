@@ -15,4 +15,4 @@ void solicitarInformeDB(sqlite3* db);
  */
 void menuAdminClientDB(sqlite3* db);
 
-#endif
+#endif /* ADMIN_CLIENT_H */

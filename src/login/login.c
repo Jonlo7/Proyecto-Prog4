@@ -19,6 +19,7 @@ Usuario* realizarLoginDB(RegistroUsuarios* reg, sqlite3* db) {
     printf("Ingrese la contrasenya: ");
     scanf(" %[^\n]", contrasena);
     
+    // Se utiliza la versión DB para autenticar, que debería estar implementada en usuarios/usuarios.c
     return autenticarUsuarioDB(db, usuario, contrasena);
 }
 

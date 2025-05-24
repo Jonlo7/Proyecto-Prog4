@@ -1,3 +1,4 @@
+// client_net/admin_net.cpp
 #include "admin_net.h"
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -62,6 +63,7 @@ std::string AdminNet::sendCommand(const std::string& cmd) {
         return "";
     }
     if (received == 0) {
+        // conexión cerrada
         return "";
     }
 
