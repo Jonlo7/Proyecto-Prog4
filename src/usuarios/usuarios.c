@@ -1,5 +1,5 @@
-#include "usuarios.h"
-#include "bbdd/sqlite/sqlite3.h"
+#include "usuarios/usuarios.h"
+#include <sqlite3.h>
 
 RegistroUsuarios* crearRegistroUsuarios(void) {
     RegistroUsuarios* reg = malloc(sizeof(RegistroUsuarios));

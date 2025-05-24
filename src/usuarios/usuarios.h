@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "colors/colors.h"
-#include "bbdd/sqlite/sqlite3.h"
+#include <sqlite3.h>
 
 #define MAX_USUARIO 50
 #define MAX_CONTRASENA 50

@@ -1,5 +1,5 @@
-#include "admin_cliente.h"
-#include "bbdd/sqlite/sqlite3.h"
+#include "admin_cliente/admin_cliente.h"
+#include <sqlite3.h>
 
 void menuAdminClientDB(sqlite3* db) {
     int opcion = 0;
@@ -39,7 +39,7 @@ void menuAdminClientDB(sqlite3* db) {
                 printf("\n Saliendo del módulo de administracion...\n");
                 break;
             default:
-                printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+                printf("\n \033[1;31mOpción inválida. Intente de nuevo.\033[0m\n");
         }
     } while(opcion != 4);
 }

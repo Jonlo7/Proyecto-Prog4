@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include "colors/colors.h"
-#include "bbdd/sqlite/sqlite3.h"
+#include <sqlite3.h>
 
 /**
  * Función para solicitar un informe, que podría utilizar la BD para generar datos.

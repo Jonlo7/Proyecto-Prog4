@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "db_init.h"
+#include "db_init/db_init.h"
 
 int inicializarBaseDatos(sqlite3* db) {
     int rc;
@@ -11,7 +11,7 @@ int inicializarBaseDatos(sqlite3* db) {
         sqlite3_free(errMsg);
         return -1;
     }
-    
+
     const char* sqlProductos =
         "CREATE TABLE IF NOT EXISTS productos ("
         "  id INTEGER PRIMARY KEY AUTOINCREMENT,"

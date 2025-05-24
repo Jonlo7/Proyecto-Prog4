@@ -3,7 +3,7 @@
 
 #include "usuarios/usuarios.h"
 #include "colors/colors.h"
-#include "bbdd/sqlite/sqlite3.h"
+#include <sqlite3.h>
 
 /**
  * Realiza el proceso de login solicitando usuario y contraseña utilizando la base de datos.
@@ -20,4 +20,4 @@ Usuario* realizarLoginDB(RegistroUsuarios* reg, sqlite3* db);
  */
 void menuLoginDB(RegistroUsuarios* reg, sqlite3* db);
 
-#endif
+#endif 

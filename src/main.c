@@ -3,8 +3,8 @@
 #include "transacciones/transacciones.h"
 #include "login/login.h"
 #include "colors/colors.h"
-#include "bbdd/sqlite/sqlite3.h"
-#include "bbdd/db_init/db_init.h"
+#include <sqlite3.h>
+#include "db_init/db_init.h"
 
 void menuAdminDB(RegistroUsuarios* reg, Inventario* inv, sqlite3* db) {
     int opcion = 0;
@@ -17,7 +17,7 @@ void menuAdminDB(RegistroUsuarios* reg, Inventario* inv, sqlite3* db) {
         printf("| 2. Agregar producto                  |\n");
         printf("| 3. Actualizar stock                  |\n");
         printf("| 4. Modificar producto                |\n");
-        printf("| 5. Crear transaccion                 |\n");
+        printf("| 5. Crear transacción                 |\n");
         printf("| 6. Registrar usuario                 |\n");
         printf("| 7. Cerrar sesion                     |\n");
         printf("+--------------------------------------+\n");
@@ -53,10 +53,10 @@ void menuAdminDB(RegistroUsuarios* reg, Inventario* inv, sqlite3* db) {
                 menuRegistrarUsuarioDB(db);
                 break;
             case 7:
-                printf("Cerrando sesion...\n");
+                printf("Cerrando sesión...\n");
                 break;
             default:
-                printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+                printf("\n \033[1;31mOpción inválida. Intente de nuevo.\033[0m\n");
         }
     } while(opcion != 7);
 }
@@ -96,10 +96,10 @@ void menuEmpleadoDB(Inventario* inv, sqlite3* db) {
                 menuCrearTransaccionDB(inv, db);
                 break;
             case 4:
-                printf("Cerrando sesion...\n");
+                printf("Cerrando sesión...\n");
                 break;
             default:
-                printf("\033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
+                printf("\033[1;31mOpción inválida. Intente de nuevo.\033[0m\n");
         }
     } while(opcion != 4);
 }
@@ -181,7 +181,7 @@ int main(void) {
                 menuRegistrarUsuarioDB(db);
                 break;
             case 3:
-                printf("Saliendo de la aplicacion...\n");
+                printf("Saliendo de la aplicación...\n");
                 break;
             default:
                 printf("\n \033[1;31mOpcion invalida. Intente de nuevo.\033[0m\n");
