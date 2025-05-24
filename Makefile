@@ -1,33 +1,23 @@
-# Makefile para compilar en Windows (MinGW) usando SQLite amalgamada como objeto C
-
 CXX        = g++
 CC         = gcc
 
-# Flags para C++
 CPPFLAGS   = -std=c++17 -I./src -I./bbdd/sqlite -I./bbdd/db_init -Wall -Wextra
-# Flags para C
 CFLAGS     = -I./bbdd/sqlite -I./bbdd/db_init -DSQLITE_THREADSAFE=0
 
-# Librerías para enlazar
-LDFLAGS    = -lws2_32      # Winsock
+LDFLAGS    = -lws2_32     
 
-# Fuentes de servidor (C++)
 SERVER_SRCS = src/server/server.cpp \
               src/server/db_handler.cpp
 
-# Objeto de SQLite compilado como C
 SQLITE_OBJ  = sqlite3.o
 
-# Fuentes de cliente Hito 3 (solo C++)
 CLIENT_CPP_SRCS = src/client_net/admin_net.cpp \
                   src/main.cpp
 
-# Objetos intermedios cliente
 CLIENT_OBJS    = admin_net.o main.o
 
-# Flags para el legacy (Hito 2)
 LEGACY_CFLAGS = -I./src -I./bbdd -I./bbdd/db_init -I./bbdd/sqlite
-# Fuentes de la versión monolítica antigua (Hito 2)
+
 LEGACY_SRCS = bbdd/db_init/db_init.c \
               bbdd/sqlite/sqlite3.c \
               src/main.c \
@@ -37,7 +27,6 @@ LEGACY_SRCS = bbdd/db_init/db_init.c \
               src/transacciones/transacciones.c \
               src/usuarios/usuarios.c
 
-# Binarios de salida
 SERVER_BIN  = servidor.exe
 CLIENT_BIN  = cliente.exe
 LEGACY_BIN  = main.exe
@@ -65,7 +54,6 @@ main.o: src/main.cpp
 $(CLIENT_BIN): $(CLIENT_OBJS)
 	$(CXX) $(CPPFLAGS) $(CLIENT_OBJS) $(LDFLAGS) -o $@
 
-# Regla para generar el ejecutable monolítico (Hito 2)
 $(LEGACY_BIN): $(LEGACY_SRCS)
 	$(CC) -g $(LEGACY_CFLAGS) \
 	      bbdd/db_init/db_init.c bbdd/sqlite/sqlite3.c \

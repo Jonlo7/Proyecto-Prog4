@@ -1,4 +1,3 @@
-// src/server/db_handler.h
 #ifndef DB_HANDLER_H
 #define DB_HANDLER_H
 
@@ -8,8 +7,6 @@
 #include <sqlite3.h>
 
 namespace stdx = std::experimental;
-
-// Estructura para productos
 struct Producto {
     int         id;
     std::string nombre;
@@ -17,7 +14,6 @@ struct Producto {
     int         stock;
 };
 
-// Estructura para una venta individual
 struct Transaccion {
     int          id;
     std::string  tipo;
@@ -25,7 +21,6 @@ struct Transaccion {
     double       total;
 };
 
-// Estructura con estadísticas de ventas
 struct SalesStats {
     int    totalCount;
     double totalRevenue;
@@ -37,11 +32,9 @@ public:
     explicit DBHandler(const std::string& db_path);
     ~DBHandler();
 
-    // Abre / cierra la conexión a la base de datos SQLite
     bool open();
     void close();
 
-    // Productos
     std::vector<Producto>             listProducts();
     bool                              addProduct(const Producto& p);
     bool                              updateStock(int id, int delta);
@@ -49,7 +42,6 @@ public:
     bool                              deleteProduct(int id);
     std::vector<Producto>             listLowStock(int threshold);
 
-    // Ventas
     bool                              recordSale(int productId, int qty, const std::string& date);
     std::vector<Transaccion>          listTransactions();
     SalesStats                        getSalesStats(const std::string& start, const std::string& end);
@@ -59,4 +51,4 @@ private:
     sqlite3*    db_;
 };
 
-#endif // DB_HANDLER_H
+#endif

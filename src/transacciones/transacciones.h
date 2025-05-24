@@ -70,4 +70,4 @@ int guardarTransaccionDB(sqlite3* db, const Transaccion* trans);
  */
 void menuCrearTransaccionDB(Inventario* inv, sqlite3* db);
 
-#endif /* TRANSACCIONES_H */
+#endif

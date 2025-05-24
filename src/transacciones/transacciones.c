@@ -58,7 +58,6 @@ void calcularTotalTransaccion(Transaccion* trans) {
 int guardarTransaccionDB(sqlite3* db, const Transaccion* trans) {
     if (!db || !trans) return -1;
     
-    // Inserción de la transacción en la tabla "transacciones"
     const char* sqlTrans = "INSERT INTO transacciones (tipo, fecha, total) VALUES (?, ?, ?);";
     sqlite3_stmt* stmtTrans;
     int rc = sqlite3_prepare_v2(db, sqlTrans, -1, &stmtTrans, NULL);
@@ -66,7 +65,6 @@ int guardarTransaccionDB(sqlite3* db, const Transaccion* trans) {
         fprintf(stderr, "Error preparando INSERT transaccion: %s\n", sqlite3_errmsg(db));
         return -1;
     }
-    // Convertir el tipo a cadena ("VENTA" o "COMPRA")
     sqlite3_bind_text(stmtTrans, 1, (trans->tipo == VENTA) ? "VENTA" : "COMPRA", -1, SQLITE_STATIC);
     sqlite3_bind_text(stmtTrans, 2, trans->fecha, -1, SQLITE_STATIC);
     sqlite3_bind_double(stmtTrans, 3, trans->totalTransaccion);
@@ -79,10 +77,7 @@ int guardarTransaccionDB(sqlite3* db, const Transaccion* trans) {
     }
     sqlite3_finalize(stmtTrans);
     
-    // Obtener el ID de la transacción recién insertada
     long transaccionId = sqlite3_last_insert_rowid(db);
-    
-    // Inserción de cada ítem de la transacción en la tabla "items_transaccion"
     const char* sqlItem = "INSERT INTO items_transaccion (transaccion_id, producto_id, cantidad, precio_unitario, total_item) "
                           "VALUES (?, ?, ?, ?, ?);";
     sqlite3_stmt* stmtItem;
@@ -105,7 +100,7 @@ int guardarTransaccionDB(sqlite3* db, const Transaccion* trans) {
             sqlite3_finalize(stmtItem);
             return -1;
         }
-        sqlite3_reset(stmtItem); // Preparar para el siguiente ítem
+        sqlite3_reset(stmtItem);
     }
     sqlite3_finalize(stmtItem);
     

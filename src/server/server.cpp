@@ -1,6 +1,3 @@
-// server.cpp
-// Versión solo Windows, sin lógica condicional
-
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #pragma comment(lib, "Ws2_32.lib")
@@ -22,31 +19,25 @@ Server::~Server() {
 }
 
 bool Server::init() {
-    // Inicializar Winsock
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
         std::cerr << "WSAStartup falló\n";
         return false;
     }
 
-    // Abrir base de datos
     if (!db_.open()) {
         std::cerr << "Error: no se pudo abrir la BD en " << db_path_ << "\n";
         return false;
     }
 
-    // Crear socket
     listen_sock_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listen_sock_ == INVALID_SOCKET) {
         std::cerr << "Error: socket() falló, código " << WSAGetLastError() << "\n";
         return false;
     }
-
-    // Reusar dirección
     BOOL opt = TRUE;
     setsockopt(listen_sock_, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&opt), sizeof(opt));
 
-    // Bind
     sockaddr_in addr{};
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
@@ -56,7 +47,6 @@ bool Server::init() {
         return false;
     }
 
-    // Listen
     if (listen(listen_sock_, 10) == SOCKET_ERROR) {
         std::cerr << "listen() falló, código " << WSAGetLastError() << "\n";
         return false;
@@ -76,7 +66,6 @@ void Server::run() {
             continue;
         }
 
-        // Leer comando
         char buffer[2048];
         int received = recv(client_sock, buffer, sizeof(buffer) - 1, 0);
         if (received == SOCKET_ERROR || received == 0) {
@@ -86,7 +75,6 @@ void Server::run() {
         buffer[received] = '\0';
         std::string cmd(buffer);
 
-        // Procesar y responder
         std::string resp = handleCommand(cmd);
         send(client_sock, resp.c_str(), static_cast<int>(resp.size()), 0);
         closesocket(client_sock);
@@ -155,7 +143,7 @@ std::string Server::handleCommand(const std::string& cmd) {
         return db_.recordSale(id, qty, date) ? "OK|RECORD_SALE" : "ERROR|RECORD_SALE";
     }
     else if (action == "LIST_TRANSACTIONS") {
-        auto trs = db_.listTransactions(); // Implementa este método en tu DBHandler
+        auto trs = db_.listTransactions();
         std::ostringstream out;
         out << "OK|TRANSACTIONS|";
         for (size_t i = 0; i < trs.size(); ++i) {

@@ -11,7 +11,7 @@ Un sistema de gestión de inventarios y transacciones pensado para tiendas peque
 - [Características](#-características)  
 - [Estructura del proyecto](#-estructura-del-proyecto)  
 - [Compilación y ejecución](#-compilación-y-ejecución)  
-  - [Hito 2 (Monolítico)](#hito-2-monolítico)  
+  - [Hito 2](#hito-2)  
   - [Hito 3 (Cliente-servidor)](#hito-3-cliente-servidor)  
 - [Uso de la aplicación](#-uso-de-la-aplicación)  
   - [Credenciales y roles](#credenciales-y-roles)  
@@ -24,7 +24,7 @@ Un sistema de gestión de inventarios y transacciones pensado para tiendas peque
 
 ## 🛠 Características
 
-- **Hito 2 (Monolítico):**  
+- **Hito 2:**  
   - Gestión de inventario en memoria dinámica + ficheros de texto.  
   - Usuarios con roles y login en consola.  
   - Transacciones (ventas/compras) multi-ítem.
@@ -49,10 +49,10 @@ Un sistema de gestión de inventarios y transacciones pensado para tiendas peque
 /
 ├─ bbdd/
 │   ├─ sqlite/            ← SQLite amalgamada
-│   └─ db\_init/           ← Creación de tablas (Hito 2)
+│   └─ db\_init/          ← Creación de tablas (Hito 2)
 ├─ src/
-│   ├─ admin\_cliente/     ← Stub administrador (Hito 2)
-│   ├─ client\_net/        ← Cliente TCP (Hito 3)
+│   ├─ admin\_cliente/    ← Stub administrador (Hito 2)
+│   ├─ client\_net/       ← Cliente TCP (Hito 3)
 │   ├─ colors/            ← Definiciones ANSI para colores
 │   ├─ inventario/        ← Módulo inventario (Hito 2)
 │   ├─ login/             ← Módulo login (Hito 2)
@@ -71,7 +71,7 @@ Un sistema de gestión de inventarios y transacciones pensado para tiendas peque
 
 ## ⚙️ Compilación y Ejecución
 
-### Hito 2 (Monolítico)
+### Hito 2
 
 ```bash
 make legacy

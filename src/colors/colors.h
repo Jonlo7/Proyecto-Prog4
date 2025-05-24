@@ -10,4 +10,4 @@
 #define COLOR_RESET  "\033[0m"
 
 
-#endif /* COLORS_H */
+#endif

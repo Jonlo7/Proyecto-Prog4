@@ -71,4 +71,4 @@ Usuario* autenticarUsuarioDB(sqlite3* db, const char* usuario, const char* contr
  */
 void menuRegistrarUsuarioDB(sqlite3* db);
 
-#endif /* USUARIOS_H */
+#endif

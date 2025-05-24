@@ -4,7 +4,6 @@
 #include "usuarios/usuarios.h"
 #include <sqlite3.h>
 
-
 Usuario* realizarLoginDB(RegistroUsuarios* reg, sqlite3* db) {
     char usuario[MAX_USUARIO + 1];
     char contrasena[MAX_CONTRASENA + 1];
@@ -19,7 +18,6 @@ Usuario* realizarLoginDB(RegistroUsuarios* reg, sqlite3* db) {
     printf("Ingrese la contrasenya: ");
     scanf(" %[^\n]", contrasena);
     
-    // Se utiliza la versión DB para autenticar, que debería estar implementada en usuarios/usuarios.c
     return autenticarUsuarioDB(db, usuario, contrasena);
 }
 

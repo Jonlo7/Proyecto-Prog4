@@ -108,4 +108,4 @@ void menuActualizarStockDB(sqlite3* db);
  */
 void menuModificarProductoDB(sqlite3* db);
 
-#endif /* INVENTARIO_H */
+#endif

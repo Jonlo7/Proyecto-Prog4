@@ -21,4 +21,4 @@ Usuario* realizarLoginDB(RegistroUsuarios* reg, sqlite3* db);
  */
 void menuLoginDB(RegistroUsuarios* reg, sqlite3* db);
 
-#endif /* LOGIN_H */
+#endif

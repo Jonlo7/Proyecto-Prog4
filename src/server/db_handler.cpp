@@ -1,8 +1,6 @@
-// src/server/db_handler.cpp
 #include "db_handler.h"
 #include <sqlite3.h>
 #include <iostream>
-
 
 DBHandler::DBHandler(const std::string& db_path)
   : db_path_(db_path),
@@ -13,7 +11,6 @@ DBHandler::~DBHandler() {
     close();
 }
 
-// Abre la base de datos (db_ es sqlite3*)
 bool DBHandler::open() {
     if (sqlite3_open(db_path_.c_str(), &db_) != SQLITE_OK) {
         std::cerr << "Error abriendo BD: " << sqlite3_errmsg(db_) << "\n";
@@ -26,7 +23,6 @@ void DBHandler::close() {
     if (db_) sqlite3_close(db_);
 }
 
-// Lista todos los productos activos
 std::vector<Producto> DBHandler::listProducts() {
     const char* sql = 
         "SELECT id, nombre, precio, stock "
@@ -52,7 +48,6 @@ std::vector<Producto> DBHandler::listProducts() {
     return salida;
 }
 
-// Inserta un producto (lo marca activo = 1)
 bool DBHandler::addProduct(const Producto& p) {
     const char* sql =
         "INSERT INTO productos (id, nombre, precio, stock, activo) "
@@ -72,7 +67,6 @@ bool DBHandler::addProduct(const Producto& p) {
     return ok;
 }
 
-// Ajusta stock (puede ser positivo o negativo)
 bool DBHandler::updateStock(int id, int delta) {
     const char* sql =
         "UPDATE productos "
@@ -91,7 +85,6 @@ bool DBHandler::updateStock(int id, int delta) {
     return ok;
 }
 
-// Obtiene un producto concreto
 stdx::optional<Producto> DBHandler::getProduct(int id) {
     const char* sql =
         "SELECT id, nombre, precio, stock "
@@ -117,7 +110,6 @@ stdx::optional<Producto> DBHandler::getProduct(int id) {
     return opt;
 }
 
-// Marca activo = 0
 bool DBHandler::deleteProduct(int id) {
     const char* sql =
         "UPDATE productos "
@@ -135,22 +127,18 @@ bool DBHandler::deleteProduct(int id) {
     return ok;
 }
 
-// Graba una venta: crea transacción + items_transaccion + ajusta stock
 bool DBHandler::recordSale(int producto_id, int cantidad, const std::string& fecha) {
-    // Recuperar precio unitario
     auto optP = getProduct(producto_id);
     if (!optP) return false;
     double pu = optP->precio;
     double total = pu * cantidad;
 
-    // Empezar transacción
     char* err = nullptr;
     if (sqlite3_exec(db_, "BEGIN;", nullptr, nullptr, &err) != SQLITE_OK) {
         sqlite3_free(err);
         return false;
     }
 
-    // 1) insert en transacciones
     const char* sql1 =
         "INSERT INTO transacciones (tipo, fecha, total) "
         "VALUES ('venta', ?, ?);";
@@ -169,10 +157,8 @@ bool DBHandler::recordSale(int producto_id, int cantidad, const std::string& fec
     }
     sqlite3_finalize(st1);
 
-    // Obtener el último ID de transacción
     int trans_id = static_cast<int>(sqlite3_last_insert_rowid(db_));
 
-    // 2) insert en items_transaccion
     const char* sql2 =
         "INSERT INTO items_transaccion "
         "(transaccion_id, producto_id, cantidad, precio_unitario, total_item) "
@@ -195,13 +181,11 @@ bool DBHandler::recordSale(int producto_id, int cantidad, const std::string& fec
     }
     sqlite3_finalize(st2);
 
-    // 3) ajustar stock
     if (!updateStock(producto_id, -cantidad)) {
         sqlite3_exec(db_, "ROLLBACK;", nullptr, nullptr, nullptr);
         return false;
     }
 
-    // Commit
     if (sqlite3_exec(db_, "COMMIT;", nullptr, nullptr, &err) != SQLITE_OK) {
         sqlite3_free(err);
         sqlite3_exec(db_, "ROLLBACK;", nullptr, nullptr, nullptr);
@@ -210,7 +194,6 @@ bool DBHandler::recordSale(int producto_id, int cantidad, const std::string& fec
     return true;
 }
 
-// Lista transacciones entre dos fechas (formato YYYY-MM-DD)
 std::vector<Transaccion> DBHandler::listTransactions() {
     const char* sql =
       "SELECT id, tipo, fecha, total FROM transacciones;";
@@ -234,7 +217,6 @@ std::vector<Transaccion> DBHandler::listTransactions() {
     return res;
 }
 
-// Estadísticas: total ventas (items), ingresos y promedio por venta
 SalesStats DBHandler::getSalesStats(const std::string& start, const std::string& end) {
     const char* sql =
         "SELECT COUNT(it.id), SUM(it.total_item), AVG(it.total_item) "
@@ -263,7 +245,6 @@ SalesStats DBHandler::getSalesStats(const std::string& start, const std::string&
     return st;
 }
 
-// Productos con stock bajo un umbral
 std::vector<Producto> DBHandler::listLowStock(int threshold) {
     const char* sql =
         "SELECT id, nombre, precio, stock "

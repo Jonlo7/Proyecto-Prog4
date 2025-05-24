@@ -6,7 +6,7 @@
 #include <sqlite3.h>
 #include "db_init/db_init.h"
 
-// Menú de administrador usando funciones basadas en la BD
+// Menú de administrador
 void menuAdminDB(RegistroUsuarios* reg, Inventario* inv, sqlite3* db) {
     int opcion = 0;
     do {
@@ -62,7 +62,7 @@ void menuAdminDB(RegistroUsuarios* reg, Inventario* inv, sqlite3* db) {
     } while(opcion != 7);
 }
 
-// Menú de empleado usando funciones basadas en la BD
+// Menú de empleado
 void menuEmpleadoDB(Inventario* inv, sqlite3* db) {
     int opcion = 0;
     do {
@@ -108,22 +108,19 @@ void menuEmpleadoDB(Inventario* inv, sqlite3* db) {
 
 
 int main(void) {
-    // Abrir la base de datos
     sqlite3* db;
     int rc = sqlite3_open("inventario.sqlite", &db);
     if (rc != SQLITE_OK) {
         printf("\n \033[1;31mError al abrir la base de datos: %s\033[0m\n", sqlite3_errmsg(db));
         return 1;
     }
-    
-    // Inicializar la base de datos: crear tablas y configurar opciones
+
     if (inicializarBaseDatos(db) != 0) {
         printf("\n \033[1;31mError al inicializar la base de datos.\033[0m\n");
         sqlite3_close(db);
         return 1;
     }
-    
-    // Crear el inventario y cargarlo desde la BD
+
     Inventario* inv = crearInventario();
     if (!inv) {
         printf("\n \033[1;31mError al crear el inventario.\033[0m\n");
@@ -134,7 +131,6 @@ int main(void) {
         printf("\n \033[1;31mError al cargar el inventario.\033[0m\n");
     }
     
-    // Crear el registro de usuarios y cargarlo desde la BD
     RegistroUsuarios* reg = crearRegistroUsuarios();
     if (!reg) {
         printf("\n \033[1;31mError al crear el registro de usuarios.\033[0m\n");
